@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet }, ref) => {
+const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -44,6 +44,13 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
       unselectAuto={false}
       selectOverlap={true}
       slotEventOverlap={false}
+      editable={true}
+      eventDrop={(info) => {
+        if (onEventDrop) onEventDrop(info);
+      }}
+      eventResize={(info) => {
+        if (onEventResize) onEventResize(info);
+      }}
       select={(info) => {
         if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
           onDateSelect(info.start, info.end);

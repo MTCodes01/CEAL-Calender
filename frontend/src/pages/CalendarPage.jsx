@@ -101,6 +101,47 @@ export default function CalendarPage() {
     }
   };
 
+  const handleEventDrop = async (info) => {
+    const { event, revert } = info;
+    
+    // Check permission
+    if (!canEditEvent(event)) {
+      revert();
+      return;
+    }
+
+    try {
+      await api.patch(`/api/events/${event.id}/`, {
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+      });
+      // No need to reload events as FullCalendar updates optimistically
+    } catch (error) {
+      console.error('Failed to update event:', error);
+      revert();
+    }
+  };
+
+  const handleEventResize = async (info) => {
+    const { event, revert } = info;
+
+    // Check permission
+    if (!canEditEvent(event)) {
+      revert();
+      return;
+    }
+
+    try {
+      await api.patch(`/api/events/${event.id}/`, {
+        start: event.start.toISOString(),
+        end: event.end.toISOString(),
+      });
+    } catch (error) {
+      console.error('Failed to update event:', error);
+      revert();
+    }
+  };
+
   const handleModalClose = () => {
     setShowEventModal(false);
     setSelectedEvent(null);
@@ -156,6 +197,8 @@ export default function CalendarPage() {
               onEventClick={handleEventClick}
               onDateSelect={handleDateSelect}
               onDatesSet={loadEvents}
+              onEventDrop={handleEventDrop}
+              onEventResize={handleEventResize}
             />
           </div>
         </div>
