@@ -18,6 +18,10 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
     end: event.end,
     backgroundColor: event.club.color,
     borderColor: event.club.color,
+    editable: event.editable,
+    startEditable: event.startEditable,
+    durationEditable: event.durationEditable,
+    resourceEditable: event.resourceEditable,
     extendedProps: {
       description: event.description,
       location: event.location,
