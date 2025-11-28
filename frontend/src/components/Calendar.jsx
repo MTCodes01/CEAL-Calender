@@ -69,7 +69,7 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
         if (eventInfo.view.type === 'dayGridMonth') {
           return (
             <div 
-              className="px-2 py-0.5 rounded text-xs font-medium truncate text-white w-full"
+              className="px-2 py-0.5 rounded text-xs font-medium truncate text-white w-full text-center"
               style={{ backgroundColor: eventInfo.event.backgroundColor }}
             >
               {eventInfo.event.title}
