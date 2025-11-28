@@ -17,7 +17,7 @@ export default function Navbar() {
     <nav className="bg-white dark:bg-gray-800 shadow-md border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          <div className="flex items-center">
+          <div>
             <Link to="/calendar" className="text-2xl font-bold text-primary-600 dark:text-primary-400">
               CEAL Calendar
             </Link>
