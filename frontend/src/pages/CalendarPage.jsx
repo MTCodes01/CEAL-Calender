@@ -120,7 +120,7 @@ export default function CalendarPage() {
   };
 
   const handleEventDrop = async (info) => {
-    const { event, revert } = info;
+    const { event, oldEvent, revert, view } = info;
     
     // Check permission
     if (!canEditEvent(event)) {
@@ -128,12 +128,35 @@ export default function CalendarPage() {
       return;
     }
 
+    let start = event.start;
+    let end = event.end;
+
+    // Preserve time when dragging in Month View
+    if (view.type === 'dayGridMonth' && oldEvent.start) {
+      const newDate = new Date(start);
+      const oldDate = new Date(oldEvent.start);
+      
+      newDate.setHours(oldDate.getHours(), oldDate.getMinutes(), oldDate.getSeconds());
+      start = newDate;
+
+      if (oldEvent.end) {
+        const duration = oldEvent.end.getTime() - oldEvent.start.getTime();
+        end = new Date(start.getTime() + duration);
+      } else {
+        end = null;
+      }
+    }
+
     try {
       await api.patch(`/api/events/${event.id}/`, {
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
+        start: start.toISOString(),
+        end: end ? end.toISOString() : null,
       });
-      // No need to reload events as FullCalendar updates optimistically
+      
+      // Reload events to reflect the correct time in the UI if we modified it
+      if (view.type === 'dayGridMonth') {
+        loadEvents();
+      }
     } catch (error) {
       console.error('Failed to update event:', error);
       revert();
@@ -169,8 +192,24 @@ export default function CalendarPage() {
   };
 
   const canEditEvent = (event) => {
-    if (!user || !user.club) return false;
-    return event.club.id === user.club.id;
+    if (!user) return false;
+    if (user.is_superuser) return true;
+
+    // Get club from event (API object) or extendedProps (FC object)
+    const eventClub = event.club || (event.extendedProps && event.extendedProps.club);
+    
+    if (!eventClub) return false;
+    
+    // Strict check matching backend:
+    // If user has a sub_club, they can ONLY edit sub_club events.
+    // If user has NO sub_club, they can edit main club events.
+    if (user.sub_club) {
+      return eventClub.id === user.sub_club.id;
+    } else if (user.club) {
+      return eventClub.id === user.club.id;
+    }
+    
+    return false;
   };
 
   return (

@@ -27,8 +27,16 @@ class IsSameClubMember(permissions.BasePermission):
         # Write permissions only for users in the same club
         if not request.user or not request.user.is_authenticated:
             return False
+            
+        if request.user.is_superuser:
+            return True
         
-        if not request.user.club:
-            return False
-        
-        return obj.club == request.user.club
+        # Check sub_club first (more specific)
+        if request.user.sub_club:
+            return obj.club == request.user.sub_club
+            
+        # Then check main club
+        if request.user.club:
+            return obj.club == request.user.club
+            
+        return False
