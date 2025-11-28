@@ -40,7 +40,7 @@ def create_clubs():
     """
     clubs_data = [
         # IEEE Clubs
-        ('ieee-cs', 'IEEE Computer Society'),
+        ('ieee-cs', 'IEEE CS'),
         ('ieee-embs', 'IEEE EMBS'),
         ('ieee-ias', 'IEEE IAS'),
         ('ieee-pes', 'IEEE PES'),
