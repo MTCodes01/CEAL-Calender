@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import CalendarPage from './pages/CalendarPage';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 
 // Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -20,6 +21,21 @@ function ProtectedRoute({ children }) {
   }
 
   return isAuthenticated ? children : <Navigate to="/login" />;
+}
+
+// Admin route wrapper
+function AdminRoute({ children }) {
+  const { isAuthenticated, user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  return isAuthenticated && user?.is_staff ? children : <Navigate to="/calendar" />;
 }
 
 function App() {
@@ -52,6 +68,14 @@ function App() {
               <ProtectedRoute>
                 <Profile />
               </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
             }
           />
           <Route path="/" element={<Navigate to="/calendar" />} />

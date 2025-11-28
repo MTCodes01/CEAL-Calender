@@ -8,5 +8,5 @@ class ClubSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Club
-        fields = ['id', 'slug', 'name', 'color']
+        fields = ['id', 'slug', 'name', 'color', 'parent']
         read_only_fields = ['id']

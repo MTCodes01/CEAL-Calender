@@ -13,7 +13,7 @@ class SignupSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['email', 'username', 'password', 'password2', 'first_name', 'last_name', 'club']
+        fields = ['email', 'username', 'password', 'password2', 'first_name', 'last_name']
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
@@ -38,14 +38,25 @@ class UserSerializer(serializers.ModelSerializer):
     Serializer for user profile with club details
     """
     club = ClubSerializer(read_only=True)
+    sub_club = ClubSerializer(read_only=True)
     
     class Meta:
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
-            'club', 'notification_enabled', 'notification_time', 'timezone'
+            'club', 'sub_club', 'notification_enabled', 'notification_time', 'timezone',
+            'is_staff', 'is_superuser'
         ]
-        read_only_fields = ['id', 'email']
+        read_only_fields = ['id', 'email', 'is_staff', 'is_superuser']
+
+
+class AdminUserUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for admin to update user club assignment
+    """
+    class Meta:
+        model = User
+        fields = ['club', 'sub_club']
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):

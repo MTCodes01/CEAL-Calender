@@ -76,3 +76,17 @@ class LogoutView(APIView):
             return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserViewSet(generics.ListAPIView, generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
+    """
+    Admin endpoint to list and update users
+    """
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAdminUser]
+    
+    def get_serializer_class(self):
+        if self.request.method in ['PUT', 'PATCH']:
+            from .serializers import AdminUserUpdateSerializer
+            return AdminUserUpdateSerializer
+        return UserSerializer

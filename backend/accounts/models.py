@@ -15,6 +15,13 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         related_name='members'
     )
+    sub_club = models.ForeignKey(
+        Club,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='sub_club_members'
+    )
     
     # Notification settings
     notification_enabled = models.BooleanField(default=True)

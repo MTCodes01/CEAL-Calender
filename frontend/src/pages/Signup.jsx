@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../api/client';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function Signup() {
@@ -12,30 +11,11 @@ export default function Signup() {
     password2: '',
     first_name: '',
     last_name: '',
-    club: '',
   });
-  const [clubs, setClubs] = useState([]);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    loadClubs();
-  }, []);
-
-  const loadClubs = async () => {
-    try {
-      const response = await api.get('/api/clubs/');
-      console.log('Clubs API Response:', response.data);
-      const data = response.data;
-      const clubsArray = Array.isArray(data) ? data : (data.results || []);
-      console.log('Processed Clubs Array:', clubsArray);
-      setClubs(Array.isArray(clubsArray) ? clubsArray : []);
-    } catch (error) {
-      console.error('Failed to load clubs:', error);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -135,25 +115,6 @@ export default function Signup() {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Club *
-            </label>
-            <select
-              required
-              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              value={formData.club}
-              onChange={(e) => setFormData({ ...formData, club: e.target.value })}
-            >
-              <option value="">Select your club</option>
-              {clubs.map((club) => (
-                <option key={club.id} value={club.id}>
-                  {club.name}
-                </option>
-              ))}
-            </select>
-            {errors.club && <p className="text-red-600 text-sm mt-1">{errors.club}</p>}
-          </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
