@@ -40,6 +40,7 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
       events={calendarEvents}
       selectable={true}
       selectMirror={true}
+      unselectAuto={false}
       select={(info) => {
         if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
           onDateSelect(info.start, info.end);
