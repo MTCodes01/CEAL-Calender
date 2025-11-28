@@ -37,7 +37,7 @@ export default function Calendar({ events, onEventClick, onDateSelect, onDatesSe
       selectable={true}
       selectMirror={true}
       select={(info) => {
-        if (onDateSelect) {
+        if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
           onDateSelect(info.start, info.end);
         }
         const calendarApi = calendarRef.current.getApi();

@@ -78,7 +78,7 @@ export default function CalendarPage() {
   const handleDateSelect = (start, end) => {
     if (user?.club) {
       setSelectedEvent({ start, end });
-      // setShowEventModal(true);
+      setShowEventModal(true);
     }
   };
 
