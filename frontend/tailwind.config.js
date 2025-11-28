@@ -9,17 +9,17 @@ export default {
     extend: {
       colors: {
         primary: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#f0f5ff',
+          100: '#e0ebff',
+          200: '#c2d6ff',
+          300: '#94b8ff',
+          400: '#5c91ff',
+          500: '#3779e6', /* Requested rgb(55 121 230) is close to this, using as base */
+          600: 'rgb(55 121 230)', /* Exact requested color */
+          700: '#2b5ec2',
+          800: '#264c9e',
+          900: '#24417d',
+          950: '#17284f',
         },
       },
     },

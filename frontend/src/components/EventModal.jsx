@@ -176,7 +176,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-primary-500 to-purple-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50"
+                  className="flex-1 bg-primary-600 text-white py-3 rounded-lg font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
                 >
                   {loading ? 'Saving...' : isEditMode ? 'Update Event' : 'Create Event'}
                 </button>
@@ -185,7 +185,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
                     type="button"
                     onClick={handleDelete}
                     disabled={loading}
-                    className="px-6 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition disabled:opacity-50"
+                    className="px-6 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:shadow-none"
                   >
                     Delete
                   </button>
