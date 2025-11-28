@@ -217,3 +217,11 @@
   border-color: #6366f1;
   ring-color: #6366f1;
 }
+
+/* Event Gaps */
+.fc-timegrid-event {
+  border: 2px solid transparent !important;
+  background-clip: padding-box;
+  border-radius: 4px;
+  box-shadow: none !important;
+}

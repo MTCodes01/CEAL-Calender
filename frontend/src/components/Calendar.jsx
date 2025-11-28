@@ -38,6 +38,7 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
         right: 'dayGridMonth,timeGridWeek,timeGridDay',
       }}
       events={calendarEvents}
+      dayMaxEvents={4}
       selectable={true}
       selectMirror={true}
       unselectAuto={false}
@@ -64,14 +65,26 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
           onDatesSet(dateInfo.start, dateInfo.end);
         }
       }}
-      eventContent={(eventInfo) => (
-        <div className="p-1 cursor-pointer">
-          <div className="font-semibold text-xs truncate text-white">{eventInfo.event.title}</div>
-          <div className="text-xs opacity-90 text-white">
-            📍 {eventInfo.event.extendedProps.location}
+      eventContent={(eventInfo) => {
+        if (eventInfo.view.type === 'dayGridMonth') {
+          return (
+            <div 
+              className="px-2 py-0.5 rounded text-xs font-medium truncate text-white w-full"
+              style={{ backgroundColor: eventInfo.event.backgroundColor }}
+            >
+              {eventInfo.event.title}
+            </div>
+          );
+        }
+        return (
+          <div className="p-1 cursor-pointer">
+            <div className="font-semibold text-xs truncate text-white">{eventInfo.event.title}</div>
+            <div className="text-xs opacity-90 text-white">
+              📍 {eventInfo.event.extendedProps.location}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      }}
       height="auto"
       slotMinTime="06:00:00"
       slotMaxTime="22:00:00"

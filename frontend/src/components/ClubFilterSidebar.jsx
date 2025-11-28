@@ -19,7 +19,7 @@ export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, 
       </div>
 
       <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-        {['IEEE', 'FOSS', 'IEDC', 'ISTE', 'NSS', 'TinkerHub', 'Cultural', 'Sports', 'Other'].map((category) => {
+        {['Cultural', 'FOSS', 'IEDC', 'IEEE', 'ISTE', 'NSS', 'Other', 'Sports', 'TinkerHub'].map((category) => {
           const categoryClubs = clubs.filter(club => {
             const s = club.slug;
             if (category === 'Cultural') return s === 'yavanika';
