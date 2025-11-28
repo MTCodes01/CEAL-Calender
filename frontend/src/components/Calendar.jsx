@@ -85,11 +85,23 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
         }
         return (
           <div className="p-1 cursor-pointer h-full flex flex-col overflow-hidden">
-            <div className="text-xs font-bold text-white mb-0.5">{eventInfo.timeText}</div>
-            <div className="font-semibold text-xs truncate text-white">{eventInfo.event.title}</div>
+            <div className="flex justify-between items-start mb-0.5">
+              <div className="text-xs font-bold text-white">{eventInfo.timeText}</div>
+              {eventInfo.event.extendedProps.club && (
+                <div className="text-[10px] bg-white/20 px-1 rounded text-white truncate max-w-[50%]">
+                  {eventInfo.event.extendedProps.club.name}
+                </div>
+              )}
+            </div>
+            <div className="font-semibold text-xs truncate text-white mb-0.5">{eventInfo.event.title}</div>
             {eventInfo.event.extendedProps.location && (
-              <div className="text-xs opacity-90 text-white truncate mt-0.5">
+              <div className="text-xs opacity-90 text-white truncate mb-0.5">
                 📍 {eventInfo.event.extendedProps.location}
+              </div>
+            )}
+            {eventInfo.event.extendedProps.description && (
+              <div className="text-[10px] opacity-80 text-white truncate">
+                {eventInfo.event.extendedProps.description}
               </div>
             )}
           </div>
