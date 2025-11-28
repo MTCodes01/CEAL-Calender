@@ -34,9 +34,12 @@ export default function CalendarPage() {
   const loadClubs = async () => {
     try {
       const response = await api.get('/api/clubs/');
-      setClubs(response.data);
+      const data = response.data;
+      const clubsArray = Array.isArray(data) ? data : (data.results || []);
+      const finalClubs = Array.isArray(clubsArray) ? clubsArray : [];
+      setClubs(finalClubs);
       // Select all clubs by default
-      setSelectedClubs(response.data.map((c) => c.id));
+      setSelectedClubs(finalClubs.map((c) => c.id));
     } catch (error) {
       console.error('Failed to load clubs:', error);
     }
@@ -57,7 +60,9 @@ export default function CalendarPage() {
       }
 
       const response = await api.get('/api/events/', { params });
-      setEvents(response.data);
+      const data = response.data;
+      const eventsArray = Array.isArray(data) ? data : (data.results || []);
+      setEvents(Array.isArray(eventsArray) ? eventsArray : []);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {

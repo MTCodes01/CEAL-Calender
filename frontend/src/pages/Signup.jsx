@@ -26,7 +26,11 @@ export default function Signup() {
   const loadClubs = async () => {
     try {
       const response = await api.get('/api/clubs/');
-      setClubs(response.data);
+      console.log('Clubs API Response:', response.data);
+      const data = response.data;
+      const clubsArray = Array.isArray(data) ? data : (data.results || []);
+      console.log('Processed Clubs Array:', clubsArray);
+      setClubs(Array.isArray(clubsArray) ? clubsArray : []);
     } catch (error) {
       console.error('Failed to load clubs:', error);
     }
