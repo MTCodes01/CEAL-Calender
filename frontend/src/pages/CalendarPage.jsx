@@ -63,7 +63,25 @@ export default function CalendarPage() {
       const response = await api.get('/api/events/', { params });
       const data = response.data;
       const eventsArray = Array.isArray(data) ? data : (data.results || []);
-      setEvents(Array.isArray(eventsArray) ? eventsArray : []);
+      
+      const processedEvents = (Array.isArray(eventsArray) ? eventsArray : []).map(event => {
+        // Check if user has permission to edit this event
+        const isEditable = user && (
+          user.is_superuser || 
+          (user.club && event.club && user.club.id === event.club.id) ||
+          (user.sub_club && event.club && user.sub_club.id === event.club.id)
+        );
+        
+        return {
+          ...event,
+          editable: isEditable,
+          startEditable: isEditable,
+          durationEditable: isEditable,
+          resourceEditable: isEditable,
+        };
+      });
+
+      setEvents(processedEvents);
     } catch (error) {
       console.error('Failed to load events:', error);
     } finally {

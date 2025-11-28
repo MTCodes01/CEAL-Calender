@@ -56,16 +56,39 @@ class EventViewSet(viewsets.ModelViewSet):
         """
         Auto-fill club and created_by from current user
         """
-        if not self.request.user.club:
+        user = self.request.user
+        # Use sub_club if available, otherwise main club
+        club = user.sub_club if user.sub_club else user.club
+        
+        if not club:
             raise permissions.PermissionDenied("You must be a member of a club to create events.")
         
         serializer.save(
-            club=self.request.user.club,
-            created_by=self.request.user
+            club=club,
+            created_by=user
         )
     
     def perform_update(self, serializer):
         """
-        Ensure club cannot be changed during update
+        Ensure user can only update events of their own club
         """
-        serializer.save(club=serializer.instance.club, created_by=serializer.instance.created_by)
+        user = self.request.user
+        event = serializer.instance
+        
+        if not user.is_superuser:
+            user_club_id = user.sub_club.id if user.sub_club else (user.club.id if user.club else None)
+            if not user_club_id or user_club_id != event.club.id:
+                raise permissions.PermissionDenied("You can only edit events for your own club.")
+                
+        serializer.save(club=event.club, created_by=event.created_by)
+
+    def perform_destroy(self, instance):
+        """
+        Ensure user can only delete events of their own club
+        """
+        user = self.request.user
+        if not user.is_superuser:
+            user_club_id = user.sub_club.id if user.sub_club else (user.club.id if user.club else None)
+            if not user_club_id or user_club_id != instance.club.id:
+                raise permissions.PermissionDenied("You can only delete events for your own club.")
+        instance.delete()
