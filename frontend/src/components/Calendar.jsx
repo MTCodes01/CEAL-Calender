@@ -1,9 +1,12 @@
+import { useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-export default function Calendar({ events, onEventClick, onDateClick, onDatesSet }) {
+export default function Calendar({ events, onEventClick, onDateSelect, onDatesSet }) {
+  const calendarRef = useRef(null);
+
   const calendarEvents = events.map((event) => ({
     id: event.id,
     title: event.title,
@@ -22,6 +25,7 @@ export default function Calendar({ events, onEventClick, onDateClick, onDatesSet
 
   return (
     <FullCalendar
+      ref={calendarRef}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       headerToolbar={{
@@ -30,12 +34,24 @@ export default function Calendar({ events, onEventClick, onDateClick, onDatesSet
         right: 'dayGridMonth,timeGridWeek,timeGridDay',
       }}
       events={calendarEvents}
+      selectable={true}
+      selectMirror={true}
+      select={(info) => {
+        if (onDateSelect) {
+          onDateSelect(info.start, info.end);
+        }
+        const calendarApi = calendarRef.current.getApi();
+        calendarApi.unselect();
+      }}
       eventClick={(info) => {
         const event = events.find((e) => e.id === parseInt(info.event.id));
         if (event) onEventClick(event);
       }}
       dateClick={(info) => {
-        if (onDateClick) onDateClick(new Date(info.date));
+        const calendarApi = calendarRef.current.getApi();
+        if (calendarApi.view.type === 'dayGridMonth') {
+          calendarApi.changeView('timeGridDay', info.dateStr);
+        }
       }}
       datesSet={(dateInfo) => {
         if (onDatesSet) {

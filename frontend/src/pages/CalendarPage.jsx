@@ -75,10 +75,10 @@ export default function CalendarPage() {
     setShowEventModal(true);
   };
 
-  const handleDateClick = (date) => {
+  const handleDateSelect = (start, end) => {
     if (user?.club) {
-      setSelectedEvent({ start: date, end: date });
-      setShowEventModal(true);
+      setSelectedEvent({ start, end });
+      // setShowEventModal(true);
     }
   };
 
@@ -138,7 +138,7 @@ export default function CalendarPage() {
             <Calendar
               events={events}
               onEventClick={handleEventClick}
-              onDateClick={handleDateClick}
+              onDateSelect={handleDateSelect}
               onDatesSet={loadEvents}
             />
           </div>
