@@ -84,11 +84,14 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
           );
         }
         return (
-          <div className="p-1 cursor-pointer">
+          <div className="p-1 cursor-pointer h-full flex flex-col overflow-hidden">
+            <div className="text-xs font-bold text-white mb-0.5">{eventInfo.timeText}</div>
             <div className="font-semibold text-xs truncate text-white">{eventInfo.event.title}</div>
-            <div className="text-xs opacity-90 text-white">
-              📍 {eventInfo.event.extendedProps.location}
-            </div>
+            {eventInfo.event.extendedProps.location && (
+              <div className="text-xs opacity-90 text-white truncate mt-0.5">
+                📍 {eventInfo.event.extendedProps.location}
+              </div>
+            )}
           </div>
         );
       }}
