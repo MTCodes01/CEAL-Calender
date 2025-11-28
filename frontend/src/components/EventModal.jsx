@@ -64,10 +64,10 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transition-colors duration-200">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? (canEdit ? 'Edit Event' : 'Event Details') : 'Create Event'}
             </h2>
             <button
@@ -79,7 +79,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg mb-4">
               {error}
             </div>
           )}
@@ -87,11 +87,11 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
           {isEditMode && !canEdit ? (
             <div className="space-y-4">
               <div>
-                <h3 className="text-xl font-semibold">{event.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">by {event.created_by_name}</p>
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{event.title}</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">by {event.created_by_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Club</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Club</label>
                 <div
                   className="px-4 py-2 rounded-lg inline-block text-white font-semibold"
                   style={{ backgroundColor: event.club.color }}
@@ -100,39 +100,39 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
-                <p>{new Date(event.start).toLocaleString()} - {new Date(event.end).toLocaleString()}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time</label>
+                <p className="text-gray-900 dark:text-gray-100">{new Date(event.start).toLocaleString()} - {new Date(event.end).toLocaleString()}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <p>📍 {event.location}</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                <p className="text-gray-900 dark:text-gray-100">📍 {event.location}</p>
               </div>
               {event.description && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <p className="text-gray-700">{event.description}</p>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                  <p className="text-gray-700 dark:text-gray-300">{event.description}</p>
                 </div>
               )}
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Location *</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location *</label>
                 <input
                   type="text"
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                   placeholder="e.g., CS Lab 2, Main Auditorium"
@@ -141,31 +141,31 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Start Date & Time *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date & Time *</label>
                   <DatePicker
                     selected={formData.start}
                     onChange={(date) => setFormData({ ...formData, start: date })}
                     showTimeSelect
                     dateFormat="Pp"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">End Date & Time *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date & Time *</label>
                   <DatePicker
                     selected={formData.end}
                     onChange={(date) => setFormData({ ...formData, end: date })}
                     showTimeSelect
                     dateFormat="Pp"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                 <textarea
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   rows="4"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}

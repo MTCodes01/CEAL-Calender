@@ -44,8 +44,8 @@ export default function Calendar({ events, onEventClick, onDateClick, onDatesSet
       }}
       eventContent={(eventInfo) => (
         <div className="p-1 cursor-pointer">
-          <div className="font-semibold text-xs truncate">{eventInfo.event.title}</div>
-          <div className="text-xs opacity-90">
+          <div className="font-semibold text-xs truncate text-white">{eventInfo.event.title}</div>
+          <div className="text-xs opacity-90 text-white">
             📍 {eventInfo.event.extendedProps.location}
           </div>
         </div>

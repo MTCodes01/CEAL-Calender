@@ -100,7 +100,7 @@ export default function CalendarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
       
       <div className="flex">
@@ -119,16 +119,16 @@ export default function CalendarPage() {
         />
 
         <div className="flex-1 p-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900">Event Calendar</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Event Calendar</h1>
               {user?.club && (
                 <button
                   onClick={() => {
                     setSelectedEvent({ start: new Date(), end: new Date() });
                     setShowEventModal(true);
                   }}
-                  className="bg-gradient-to-r from-primary-500 to-purple-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg transition"
+                  className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200"
                 >
                   + Create Event
                 </button>

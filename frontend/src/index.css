@@ -64,3 +64,156 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200;
+  }
+}
+
+/* Dark mode overrides for FullCalendar */
+.dark .fc {
+  --fc-page-bg-color: #1f2937;
+  --fc-neutral-bg-color: #374151;
+  --fc-list-event-hover-bg-color: #374151;
+  --fc-theme-standard-border-color: #374151;
+  --fc-button-text-color: #fff;
+  --fc-button-bg-color: #4f46e5;
+  --fc-button-border-color: #4f46e5;
+  --fc-button-hover-bg-color: #4338ca;
+  --fc-button-hover-border-color: #4338ca;
+  --fc-button-active-bg-color: #3730a3;
+  --fc-button-active-border-color: #3730a3;
+  --fc-event-bg-color: #4f46e5;
+  --fc-event-border-color: #4f46e5;
+  --fc-today-bg-color: rgba(79, 70, 229, 0.1);
+}
+
+.dark .fc-theme-standard .fc-scrollgrid {
+  border-color: #374151;
+}
+
+.dark .fc-theme-standard td,
+.dark .fc-theme-standard th {
+  border-color: #374151;
+}
+
+.dark .fc-col-header-cell-cushion,
+.dark .fc-daygrid-day-number,
+.dark .fc-list-day-text,
+.dark .fc-list-day-side-text {
+  color: #e5e7eb;
+  /* gray-200 */
+}
+
+.dark .fc-col-header-cell {
+  background-color: #1f2937;
+  /* gray-800 */
+}
+
+.dark .fc-daygrid-day.fc-day-today {
+  background-color: rgba(79, 70, 229, 0.1) !important;
+}
+
+.dark .fc-button-primary {
+  background-color: #4f46e5;
+  border-color: #4f46e5;
+}
+
+.dark .fc-button-primary:hover {
+  background-color: #4338ca;
+  border-color: #4338ca;
+}
+
+.dark .fc-button-primary:disabled {
+  background-color: #374151;
+  border-color: #374151;
+  color: #9ca3af;
+}
+
+.dark .fc-toolbar-title {
+  color: #f3f4f6;
+}
+
+.dark .fc-list-event:hover td {
+  background-color: #374151;
+}
+
+/* Dark mode overrides for React DatePicker */
+.dark .react-datepicker {
+  background-color: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.dark .react-datepicker__header {
+  background-color: #111827;
+  border-bottom-color: #374151;
+}
+
+.dark .react-datepicker__current-month,
+.dark .react-datepicker-time__header,
+.dark .react-datepicker-year-header {
+  color: #e5e7eb;
+}
+
+.dark .react-datepicker__day-name,
+.dark .react-datepicker__day,
+.dark .react-datepicker__time-name {
+  color: #d1d5db;
+}
+
+.dark .react-datepicker__day:hover,
+.dark .react-datepicker__month-text:hover,
+.dark .react-datepicker__quarter-text:hover,
+.dark .react-datepicker__year-text:hover {
+  background-color: #374151;
+}
+
+.dark .react-datepicker__day--selected,
+.dark .react-datepicker__day--in-selecting-range,
+.dark .react-datepicker__day--in-range,
+.dark .react-datepicker__month-text--selected,
+.dark .react-datepicker__month-text--in-selecting-range,
+.dark .react-datepicker__month-text--in-range,
+.dark .react-datepicker__quarter-text--selected,
+.dark .react-datepicker__quarter-text--in-selecting-range,
+.dark .react-datepicker__quarter-text--in-range,
+.dark .react-datepicker__year-text--selected,
+.dark .react-datepicker__year-text--in-selecting-range,
+.dark .react-datepicker__year-text--in-range {
+  background-color: #4f46e5;
+  color: #fff;
+}
+
+.dark .react-datepicker__time-container {
+  border-left-color: #374151;
+}
+
+.dark .react-datepicker__time-container .react-datepicker__time {
+  background-color: #1f2937;
+}
+
+.dark .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item {
+  color: #d1d5db;
+}
+
+.dark .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item:hover {
+  background-color: #374151;
+}
+
+.dark .react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box ul.react-datepicker__time-list li.react-datepicker__time-list-item--selected {
+  background-color: #4f46e5;
+  color: #fff;
+}
+
+.dark .react-datepicker__input-container input {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f3f4f6;
+}
+
+.dark .react-datepicker__input-container input:focus {
+  border-color: #6366f1;
+  ring-color: #6366f1;
+}
