@@ -41,6 +41,8 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet },
       selectable={true}
       selectMirror={true}
       unselectAuto={false}
+      selectOverlap={true}
+      slotEventOverlap={false}
       select={(info) => {
         if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
           onDateSelect(info.start, info.end);
