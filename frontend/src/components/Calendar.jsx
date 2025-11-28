@@ -1,11 +1,15 @@
-import { useRef } from 'react';
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 
-export default function Calendar({ events, onEventClick, onDateSelect, onDatesSet }) {
+const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet }, ref) => {
   const calendarRef = useRef(null);
+
+  useImperativeHandle(ref, () => ({
+    getApi: () => calendarRef.current.getApi(),
+  }));
 
   const calendarEvents = events.map((event) => ({
     id: event.id,
@@ -40,8 +44,7 @@ export default function Calendar({ events, onEventClick, onDateSelect, onDatesSe
         if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
           onDateSelect(info.start, info.end);
         }
-        const calendarApi = calendarRef.current.getApi();
-        calendarApi.unselect();
+        // Selection is now persisted until manually cleared
       }}
       eventClick={(info) => {
         const event = events.find((e) => e.id === parseInt(info.event.id));
@@ -74,4 +77,6 @@ export default function Calendar({ events, onEventClick, onDateSelect, onDatesSe
       nowIndicator={true}
     />
   );
-}
+});
+
+export default Calendar;

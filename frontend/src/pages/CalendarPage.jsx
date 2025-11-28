@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Calendar from '../components/Calendar';
@@ -16,6 +16,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const calendarRef = useRef(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -86,12 +87,26 @@ export default function CalendarPage() {
     loadEvents();
     setShowEventModal(false);
     setSelectedEvent(null);
+    if (calendarRef.current) {
+      calendarRef.current.getApi().unselect();
+    }
   };
 
   const handleEventDeleted = () => {
     loadEvents();
     setShowEventModal(false);
     setSelectedEvent(null);
+    if (calendarRef.current) {
+      calendarRef.current.getApi().unselect();
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowEventModal(false);
+    setSelectedEvent(null);
+    if (calendarRef.current) {
+      calendarRef.current.getApi().unselect();
+    }
   };
 
   const canEditEvent = (event) => {
@@ -136,6 +151,7 @@ export default function CalendarPage() {
             </div>
 
             <Calendar
+              ref={calendarRef}
               events={events}
               onEventClick={handleEventClick}
               onDateSelect={handleDateSelect}
@@ -149,10 +165,7 @@ export default function CalendarPage() {
         <EventModal
           event={selectedEvent}
           canEdit={selectedEvent?.id ? canEditEvent(selectedEvent) : true}
-          onClose={() => {
-            setShowEventModal(false);
-            setSelectedEvent(null);
-          }}
+          onClose={handleModalClose}
           onSave={handleEventSaved}
           onDelete={handleEventDeleted}
         />
