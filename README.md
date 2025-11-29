@@ -64,10 +64,10 @@ A full-stack web application for managing college club events with real-time cal
    ```
 
 5. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - Django Admin: http://localhost:8000/admin (admin/admin123)
-   - MailHog UI: http://localhost:8025
+   - Frontend: http://localhost:3100
+   - Backend API: http://localhost:8100
+   - Django Admin: http://localhost:8100/admin (admin/admin123)
+   - MailHog UI: http://localhost:8026
 
 ### Local Development
 
@@ -244,16 +244,16 @@ POSTGRES_DB=ceal_calendar
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your-password
 POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-REDIS_URL=redis://localhost:6379/0
+POSTGRES_PORT=5433
+REDIS_URL=redis://localhost:6380/0
 EMAIL_HOST=localhost
-EMAIL_PORT=1025
-FRONTEND_URL=http://localhost:3000
+EMAIL_PORT=1026
+FRONTEND_URL=http://localhost:3100
 ```
 
 ### Frontend (.env)
 ```
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8100
 ```
 
 ## 🐳 Docker Services

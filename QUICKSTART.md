@@ -29,16 +29,16 @@ docker-compose exec backend python seed_data.py
 ### Step 3: Access the Application
 
 Open your browser:
-- **Frontend**: http://localhost:3000
-- **Admin Panel**: http://localhost:8000/admin (login: admin / admin123)
-- **Email UI** (MailHog): http://localhost:8025
+- **Frontend**: http://localhost:3100
+- **Admin Panel**: http://localhost:8100/admin (login: admin / admin123)
+- **Email UI** (MailHog): http://localhost:8026
 
 ---
 
 ## 📝 Create Your First Event
 
 1. **Sign Up**:
-   - Go to http://localhost:3000
+   - Go to http://localhost:3100
    - Click "Sign up"
    - Choose a club (e.g., "IEEE Computer Society")
    - Complete registration
@@ -53,7 +53,7 @@ Open your browser:
    - Enable notifications
    - Set time to 1 minute from now
    - Create another event
-   - Check http://localhost:8025 after the time
+   - Check http://localhost:8026 after the time
 
 ---
 
