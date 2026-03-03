@@ -144,9 +144,15 @@ def send_digest_email(user, events):
     """
     try:
         # Prepare event data for template
-        event_data = []
+        created_events = []
+        updated_events = []
         for event in events:
-            event_data.append({
+            # If the difference between updated_at and created_at is more than 2 seconds, consider it an update
+            is_updated = False
+            if hasattr(event, 'created_at') and hasattr(event, 'updated_at') and event.created_at and event.updated_at:
+                is_updated = abs((event.updated_at - event.created_at).total_seconds()) > 2
+
+            event_data = {
                 'title': event.title,
                 'club_name': event.club.name,
                 'description': event.description,
@@ -154,19 +160,24 @@ def send_digest_email(user, events):
                 'end_datetime': format_event_datetime(event.end, user.timezone),
                 'location': event.location,
                 'created_by': f"{event.created_by.first_name} {event.created_by.last_name}".strip() or event.created_by.username,
-            })
+            }
+            if is_updated:
+                updated_events.append(event_data)
+            else:
+                created_events.append(event_data)
 
         # Render HTML email
         html_content = render_to_string('email_digest.html', {
             'user': user,
-            'events': event_data,
-            'event_count': len(event_data),
+            'created_events': created_events,
+            'updated_events': updated_events,
+            'event_count': len(events),
             'frontend_url': settings.FRONTEND_URL,
         })
 
         # Send email
         send_mail(
-            subject=f"Upcoming Events – CEAL Calendar",
+            subject=f"Upcoming Events - CEAL Calendar",
             message=(
                 f"You have {len(event_data)} upcoming event(s) across clubs. "
                 f"Visit {settings.FRONTEND_URL} to view details."
