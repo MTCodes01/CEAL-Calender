@@ -18,7 +18,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-change-this')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,domain.com').split(',')
 
 # Application definition
 INSTALLED_APPS = [
@@ -140,7 +140,7 @@ SIMPLE_JWT = {
 # CORS
 CORS_ALLOWED_ORIGINS = os.getenv(
     'CORS_ALLOWED_ORIGINS', 
-    'http://localhost:3100,http://127.0.0.1:3100'
+    'http://localhost:3100,http://127.0.0.1:3100,https://domain.com'
 ).split(',')
 
 CORS_ALLOW_CREDENTIALS = True

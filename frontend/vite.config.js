@@ -7,6 +7,12 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3100,
+    allowedHosts: [
+      'localhost',
+      '127.0.0.1',
+      'ceal.domain.com',
+      '.domain.com', // Allows all subdomains
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8100',
