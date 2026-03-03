@@ -10,6 +10,8 @@ from datetime import datetime
 
 import pytz
 
+from django.db.models import Q
+
 from accounts.models import User
 from events.models import Event
 from .utils import convert_to_local, is_within_minute, is_notification_due_today, format_event_datetime
@@ -99,8 +101,8 @@ def dispatch_notifications(self):
             new_events = list(
                 Event.objects
                 .filter(
-                    updated_at__gt=effective_start_utc,
-                    updated_at__lte=now_utc
+                    Q(created_at__gt=effective_start_utc, created_at__lte=now_utc) |
+                    Q(updated_at__gt=effective_start_utc, updated_at__lte=now_utc)
                 )
                 .select_related('club', 'created_by')
                 .order_by('start')
