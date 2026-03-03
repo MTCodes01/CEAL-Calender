@@ -92,7 +92,7 @@ export default function Settings() {
                     onChange={(e) => setFormData({ ...formData, notification_time: e.target.value })}
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                    You'll receive a daily email at this time if new events were added to your club.
+                    You'll receive a daily email at this time if events were added or updated across any clubs.
                   </p>
                 </div>
 
@@ -123,10 +123,10 @@ export default function Settings() {
           </form>
 
           <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-            <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">ℹ️  How Notifications Work</h3>
+            <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">ℹ️ How Notifications Work</h3>
             <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-1">
-              <li>• Emails are sent only if NEW events were created since your last notification</li>
-              <li>• Only events from your club will be included</li>
+              <li>• Emails are sent if events were added or updated since your last notification</li>
+              <li>• Events from all CEAL clubs will be included</li>
               <li>• Other members will continue to receive notifications if they have them enabled</li>
             </ul>
           </div>
