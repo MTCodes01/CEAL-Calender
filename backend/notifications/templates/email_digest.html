@@ -7,148 +7,147 @@
     <title>Upcoming Events – CEAL Calendar</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f5f5;
+            font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f9fa;
             margin: 0;
             padding: 0;
-            color: #333;
+            color: #1a1a1a;
         }
 
         .container {
-            max-width: 620px;
-            margin: 20px auto;
+            max-width: 600px;
+            margin: 40px auto;
             background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            border: 1px solid #eaeaea;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #1a1a1a;
             color: #ffffff;
-            padding: 30px 20px;
+            padding: 30px 40px;
             text-align: center;
         }
 
         .header h1 {
             margin: 0;
             font-size: 24px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .header p {
-            margin: 10px 0 0 0;
-            font-size: 14px;
-            opacity: 0.9;
+            margin: 10px 0 0;
+            font-size: 15px;
+            color: #a0a0a0;
         }
 
         .content {
-            padding: 30px 20px;
+            padding: 40px;
         }
 
         .greeting {
-            font-size: 16px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .event-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-
-        .event-table thead {
-            background-color: #f8f9fa;
-        }
-
-        .event-table th {
-            padding: 12px;
-            text-align: left;
+            font-size: 18px;
             font-weight: 600;
-            font-size: 13px;
-            color: #555;
-            border-bottom: 2px solid #dee2e6;
+            margin-top: 0;
+            margin-bottom: 24px;
         }
 
-        .event-table td {
-            padding: 12px;
-            border-bottom: 1px solid #e9ecef;
+        .section-title {
             font-size: 14px;
-            vertical-align: top;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 8px;
+            font-weight: 700;
         }
 
-        .event-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .event-table tr:hover {
-            background-color: #f8f9fa;
+        .event-card {
+            background-color: #ffffff;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
         }
 
         .event-title {
-            font-weight: 600;
-            color: #667eea;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
         }
 
-        .event-club {
+        .club-tag {
             display: inline-block;
-            background-color: #eef0fb;
-            color: #4a5dba;
-            font-size: 11px;
+            background-color: #f0f4ff;
+            color: #2563eb;
+            font-size: 12px;
             font-weight: 600;
-            padding: 2px 7px;
-            border-radius: 10px;
-            margin-top: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
 
-        .event-location {
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .event-description {
+        .event-meta {
+            font-size: 14px;
             color: #666;
+            margin-bottom: 6px;
+        }
+
+        .event-meta strong {
+            color: #1a1a1a;
+        }
+
+        .note {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin: 30px 0;
             font-size: 13px;
-            line-height: 1.4;
+            color: #475569;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .button-group {
+            text-align: center;
+            margin-top: 30px;
         }
 
         .button {
             display: inline-block;
             padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #ffffff;
+            background-color: #15c;
+            color: #ffffff !important;
             text-decoration: none;
-            border-radius: 4px;
-            margin: 10px 5px;
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
+            margin: 0 8px;
         }
 
-        .button:hover {
-            opacity: 0.9;
+        .button.secondary {
+            background-color: #ffffff;
+            color: #1a1a1a;
+            border: 1px solid #d1d5db;
         }
 
         .footer {
-            background-color: #f8f9fa;
-            padding: 20px;
+            background-color: #f9fafb;
+            padding: 24px 40px;
             text-align: center;
-            color: #6c757d;
-            font-size: 12px;
+            color: #6b7280;
+            font-size: 13px;
+            border-top: 1px solid #eaeaea;
         }
 
         .footer a {
-            color: #667eea;
+            color: #3b82f6;
             text-decoration: none;
-        }
-
-        .note {
-            background-color: #fff3cd;
-            border-left: 4px solid #ffc107;
-            padding: 12px 15px;
-            margin: 20px 0;
-            font-size: 13px;
-            color: #856404;
         }
     </style>
 </head>
@@ -156,64 +155,83 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📅 New Calendar Updates</h1>
-            <p>{{ event_count }} event{% if event_count != 1 %}s{% endif %} added or updated across all clubs</p>
+            <h1>📅 CEAL Calendar Updates</h1>
+            <p>{{ event_count }} event{% if event_count != 1 %}s{% endif %} modified in the last 24 hours</p>
         </div>
 
         <div class="content">
             <p class="greeting">Hi {{ user.first_name|default:user.username }},</p>
-            <p>Here {% if event_count != 1 %}are <strong>{{ event_count }} events</strong>{% else %}is <strong>1
-                    event</strong>{% endif %} added or updated across CEAL clubs in the last 24 hours:</p>
+            <p style="font-size: 15px; color: #444; line-height: 1.6; margin-bottom: 30px;">
+                Here is your Summary of events that have been newly added or recently updated across CEAL clubs.
+            </p>
 
-            <table class="event-table">
-                <thead>
-                    <tr>
-                        <th>Event</th>
-                        <th>Date &amp; Time</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for event in events %}
-                    <tr>
-                        <td>
-                            <div class="event-title">{{ event.title }}</div>
-                            <span class="event-club">{{ event.club_name }}</span>
-                            {% if event.description %}
-                            <div class="event-description" style="margin-top: 5px;">{{
-                                event.description|truncatewords:15 }}</div>
-                            {% endif %}
-                            <div class="event-location" style="margin-top: 5px; font-size: 12px;">Created by: {{
-                                event.created_by }}</div>
-                        </td>
-                        <td>
-                            <div>{{ event.datetime }}</div>
-                            <div style="font-size: 12px; color: #6c757d; margin-top: 3px;">to</div>
-                            <div>{{ event.end_datetime }}</div>
-                        </td>
-                        <td>
-                            <div class="event-location">📍 {{ event.location }}</div>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            {% if created_events %}
+            <div class="section-title" style="color: #059669; border-bottom-color: #d1fae5;">Newly Added Events</div>
+            {% for event in created_events %}
+            <div class="event-card">
+                <div class="event-title">{{ event.title }}</div>
+                <div class="club-tag">{{ event.club_name }}</div>
+
+                <div class="event-meta">
+                    <strong>When:</strong> {{ event.datetime }} to {{ event.end_datetime }}
+                </div>
+                <div class="event-meta">
+                    <strong>Where:</strong> {{ event.location }}
+                </div>
+                <div class="event-meta">
+                    <strong>Created by:</strong> {{ event.created_by }}
+                </div>
+                {% if event.description %}
+                <div
+                    style="margin-top: 12px; font-size: 14px; color: #444; line-height: 1.5; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                    {{ event.description|truncatewords:20 }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% if updated_events %}
+            <div class="section-title" style="color: #2563eb; border-bottom-color: #dbeafe; margin-top: 40px;">Updated Events</div>
+            {% for event in updated_events %}
+            <div class="event-card">
+                <div class="event-title">{{ event.title }}</div>
+                <div class="club-tag">{{ event.club_name }}</div>
+
+                <div class="event-meta">
+                    <strong>When:</strong> {{ event.datetime }} to {{ event.end_datetime }}
+                </div>
+                <div class="event-meta">
+                    <strong>Where:</strong> {{ event.location }}
+                </div>
+                <div class="event-meta">
+                    <strong>Author:</strong> {{ event.created_by }}
+                </div>
+                {% if event.description %}
+                <div
+                    style="margin-top: 12px; font-size: 14px; color: #444; line-height: 1.5; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+                    {{ event.description|truncatewords:20 }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% endif %}
 
             <div class="note">
-                <strong>💡 Note:</strong> You receive these notifications because you have notifications enabled in your
-                account settings. You can update your preferences or disable notifications at any time.
+                <strong>💡 Note:</strong> You receive these notifications because you have event notifications enabled
+                in your account settings. You can manage them below.
             </div>
 
-            <div style="text-align: center; margin-top: 30px;">
+            <div class="button-group">
                 <a href="{{ frontend_url }}" class="button">View Calendar</a>
-                <a href="{{ frontend_url }}/settings" class="button">Settings</a>
+                <a href="{{ frontend_url }}/settings" class="button secondary">Settings</a>
             </div>
         </div>
 
         <div class="footer">
-            <p>You're receiving this because you have notifications enabled on CEAL Calendar.</p>
+            <p>Sent by CEAL Calendar Notification System.</p>
             <p><a href="{{ frontend_url }}/settings">Manage your notification preferences</a></p>
-            <p style="margin-top: 10px;">© 2025 CEAL Calendar. All rights reserved.</p>
+            <p style="margin-top: 16px;">© 2026 CEAL Calendar. All rights reserved.</p>
         </div>
     </div>
 </body>
