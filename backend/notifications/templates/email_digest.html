@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Events - {{ club_name }}</title>
+    <title>Upcoming Events – CEAL Calendar</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -12,46 +13,55 @@
             padding: 0;
             color: #333;
         }
+
         .container {
-            max-width: 600px;
+            max-width: 620px;
             margin: 20px auto;
             background-color: #ffffff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: #ffffff;
             padding: 30px 20px;
             text-align: center;
         }
+
         .header h1 {
             margin: 0;
             font-size: 24px;
             font-weight: 600;
         }
+
         .header p {
             margin: 10px 0 0 0;
             font-size: 14px;
             opacity: 0.9;
         }
+
         .content {
             padding: 30px 20px;
         }
+
         .greeting {
             font-size: 16px;
             margin-bottom: 20px;
             color: #333;
         }
+
         .event-table {
             width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
         }
+
         .event-table thead {
             background-color: #f8f9fa;
         }
+
         .event-table th {
             padding: 12px;
             text-align: left;
@@ -60,31 +70,49 @@
             color: #555;
             border-bottom: 2px solid #dee2e6;
         }
+
         .event-table td {
             padding: 12px;
             border-bottom: 1px solid #e9ecef;
             font-size: 14px;
             vertical-align: top;
         }
+
         .event-table tr:last-child td {
             border-bottom: none;
         }
+
         .event-table tr:hover {
             background-color: #f8f9fa;
         }
+
         .event-title {
             font-weight: 600;
             color: #667eea;
         }
+
+        .event-club {
+            display: inline-block;
+            background-color: #eef0fb;
+            color: #4a5dba;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 10px;
+            margin-top: 4px;
+        }
+
         .event-location {
             color: #6c757d;
             font-size: 13px;
         }
+
         .event-description {
             color: #666;
             font-size: 13px;
             line-height: 1.4;
         }
+
         .button {
             display: inline-block;
             padding: 12px 24px;
@@ -96,9 +124,11 @@
             font-size: 14px;
             font-weight: 500;
         }
+
         .button:hover {
             opacity: 0.9;
         }
+
         .footer {
             background-color: #f8f9fa;
             padding: 20px;
@@ -106,10 +136,12 @@
             color: #6c757d;
             font-size: 12px;
         }
+
         .footer a {
             color: #667eea;
             text-decoration: none;
         }
+
         .note {
             background-color: #fff3cd;
             border-left: 4px solid #ffc107;
@@ -120,22 +152,24 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎉 New Events in {{ club_name }}</h1>
-            <p>{{ event_count }} new event{% if event_count != 1 %}s{% endif %} added</p>
+            <h1>📅 New Calendar Updates</h1>
+            <p>{{ event_count }} event{% if event_count != 1 %}s{% endif %} added or updated across all clubs</p>
         </div>
-        
+
         <div class="content">
             <p class="greeting">Hi {{ user.first_name|default:user.username }},</p>
-            <p>The following event{% if event_count != 1 %}s have{% else %} has{% endif %} been added to <strong>{{ club_name }}</strong> since your last notification:</p>
-            
+            <p>Here {% if event_count != 1 %}are <strong>{{ event_count }} events</strong>{% else %}is <strong>1
+                    event</strong>{% endif %} added or updated across CEAL clubs in the last 24 hours:</p>
+
             <table class="event-table">
                 <thead>
                     <tr>
                         <th>Event</th>
-                        <th>Date & Time</th>
+                        <th>Date &amp; Time</th>
                         <th>Location</th>
                     </tr>
                 </thead>
@@ -144,10 +178,13 @@
                     <tr>
                         <td>
                             <div class="event-title">{{ event.title }}</div>
+                            <span class="event-club">{{ event.club_name }}</span>
                             {% if event.description %}
-                            <div class="event-description">{{ event.description|truncatewords:15 }}</div>
+                            <div class="event-description" style="margin-top: 5px;">{{
+                                event.description|truncatewords:15 }}</div>
                             {% endif %}
-                            <div class="event-location" style="margin-top: 5px; font-size: 12px;">Created by: {{ event.created_by }}</div>
+                            <div class="event-location" style="margin-top: 5px; font-size: 12px;">Created by: {{
+                                event.created_by }}</div>
                         </td>
                         <td>
                             <div>{{ event.datetime }}</div>
@@ -161,22 +198,24 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
+
             <div class="note">
-                <strong>💡 Note:</strong> You can disable these notifications in your account settings if you no longer wish to receive them. Other club members with notifications enabled will continue to receive updates.
+                <strong>💡 Note:</strong> You receive these notifications because you have notifications enabled in your
+                account settings. You can update your preferences or disable notifications at any time.
             </div>
-            
+
             <div style="text-align: center; margin-top: 30px;">
                 <a href="{{ frontend_url }}" class="button">View Calendar</a>
                 <a href="{{ frontend_url }}/settings" class="button">Settings</a>
             </div>
         </div>
-        
+
         <div class="footer">
-            <p>You're receiving this email because you have notifications enabled for {{ club_name }}.</p>
+            <p>You're receiving this because you have notifications enabled on CEAL Calendar.</p>
             <p><a href="{{ frontend_url }}/settings">Manage your notification preferences</a></p>
             <p style="margin-top: 10px;">© 2025 CEAL Calendar. All rights reserved.</p>
         </div>
     </div>
 </body>
+
 </html>

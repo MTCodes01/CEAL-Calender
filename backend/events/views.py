@@ -1,3 +1,4 @@
+import logging
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
@@ -5,10 +6,12 @@ from .models import Event
 from .serializers import EventSerializer, EventCreateSerializer
 from .permissions import IsClubMemberOrReadOnly, IsSameClubMember
 
+logger = logging.getLogger(__name__)
+
 
 class EventViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for Event CRUD operations with club-based permissions
+    ViewSet for Event CRUD operations with club-based permissions.
     """
     queryset = Event.objects.select_related('club', 'created_by').all()
     permission_classes = [permissions.IsAuthenticated, IsClubMemberOrReadOnly, IsSameClubMember]
@@ -20,7 +23,7 @@ class EventViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Filter events by date range if provided in query params
+        Filter events by date range if provided in query params.
         """
         queryset = super().get_queryset()
         
@@ -42,7 +45,7 @@ class EventViewSet(viewsets.ModelViewSet):
                         end__gte=start_dt
                     )
             except (ValueError, TypeError):
-                pass
+                logger.warning("Invalid date params: start=%s, end=%s", start_param, end_param)
         
         # Filter by club IDs
         if club_ids:
@@ -54,7 +57,7 @@ class EventViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         """
-        Auto-fill club and created_by from current user
+        Auto-fill club and created_by from current user.
         """
         user = self.request.user
         # Use sub_club if available, otherwise main club
@@ -63,14 +66,15 @@ class EventViewSet(viewsets.ModelViewSet):
         if not club:
             raise permissions.PermissionDenied("You must be a member of a club to create events.")
         
-        serializer.save(
+        event = serializer.save(
             club=club,
             created_by=user
         )
+        logger.info("Event created: '%s' (id=%s) by %s in club '%s'", event.title, event.id, user.email, club.name)
     
     def perform_update(self, serializer):
         """
-        Ensure user can only update events of their own club
+        Ensure user can only update events of their own club.
         """
         user = self.request.user
         event = serializer.instance
@@ -81,14 +85,16 @@ class EventViewSet(viewsets.ModelViewSet):
                 raise permissions.PermissionDenied("You can only edit events for your own club.")
                 
         serializer.save(club=event.club, created_by=event.created_by)
+        logger.info("Event updated: '%s' (id=%s) by %s", event.title, event.id, user.email)
 
     def perform_destroy(self, instance):
         """
-        Ensure user can only delete events of their own club
+        Ensure user can only delete events of their own club.
         """
         user = self.request.user
         if not user.is_superuser:
             user_club_id = user.sub_club.id if user.sub_club else (user.club.id if user.club else None)
             if not user_club_id or user_club_id != instance.club.id:
                 raise permissions.PermissionDenied("You can only delete events for your own club.")
+        logger.info("Event deleted: '%s' (id=%s) by %s", instance.title, instance.id, user.email)
         instance.delete()
