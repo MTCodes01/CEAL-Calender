@@ -471,6 +471,41 @@ sudo systemctl status cloudflared
 
 ---
 
+## 🛠️ Server Update & Migration Checklist
+
+When deploying updates or moving to a new server, ensure you update these specific areas:
+
+### 1. Environment Variables (.env)
+Always check these in the root `.env`, `backend/.env`, and `frontend/.env`:
+- [ ] `DEBUG=False` (Critical for production)
+- [ ] `SECRET_KEY` (Generate a new unique one for production)
+- [ ] `ALLOWED_HOSTS` (Include your domain and IP)
+- [ ] `CORS_ALLOWED_ORIGINS` (Must match your frontend URL)
+- [ ] `VITE_API_URL` (Frontend needs this to talk to the backend)
+- [ ] `POSTGRES_PASSWORD` (Use a strong unique password)
+
+### 2. Email Configuration
+If you change your email provider or password:
+- [ ] Update `EMAIL_HOST_USER` and `EMAIL_HOST_PASSWORD` (App Password)
+- [ ] Verify `EMAIL_USE_TLS=True` and `EMAIL_PORT=587`
+
+### 3. Database Updates
+After pulling new code:
+- [ ] Run migrations: `docker-compose exec backend python manage.py migrate`
+- [ ] If new apps were added, ensure they are in `INSTALLED_APPS` (backend/ceal_calendar/settings.py)
+
+### 4. Static Files
+If you make UI changes:
+- [ ] Run `docker-compose exec backend python manage.py collectstatic --noinput`
+- [ ] Rebuild the frontend if using Docker: `docker-compose up -d --build frontend`
+
+### 5. Cloudflare Tunnel
+If your server IP changes:
+- [ ] The tunnel will automatically reconnect if `cloudflared` is running as a service.
+- [ ] If you change the domain name, update `~/.cloudflared/config.yml` and run `cloudflared tunnel route dns ceal-calendar new-domain.com`.
+
+---
+
 **🎉 Your CEAL Calendar is now deployed and accessible via Cloudflare Tunnel!**
 
 For support, check the logs or refer to:
