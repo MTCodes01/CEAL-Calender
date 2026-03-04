@@ -49,6 +49,14 @@ export default function CalendarPage() {
   const loadEvents = async (start, end) => {
     try {
       setLoading(true);
+
+      // If clubs are loaded but none are selected (e.g., "None" filter), show no events
+      if (clubs.length > 0 && selectedClubs.length === 0) {
+        setEvents([]);
+        setLoading(false);
+        return;
+      }
+
       const params = {};
       
       if (start && end) {
@@ -216,7 +224,7 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
       
-      <div className="flex">
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
         <ClubFilterSidebar
           clubs={clubs}
           selectedClubs={selectedClubs}
@@ -240,32 +248,37 @@ export default function CalendarPage() {
           onDeselectAll={() => setSelectedClubs([])}
         />
 
-        <div className="flex-1 p-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 transition-colors duration-200 border border-gray-100 dark:border-gray-700">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50/50 dark:bg-[#0f172a]/50">
+          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 transition-all duration-300 border border-white/20 dark:border-gray-700/50 min-h-full flex flex-col">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Event Calendar</h1>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Event Calendar</h1>
               {user?.club && (
                 <button
                   onClick={() => {
                     setSelectedEvent({ start: new Date(), end: new Date() });
                     setShowEventModal(true);
                   }}
-                  className="bg-primary-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200"
+                  className="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
                 >
-                  + Create Event
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  Create Event
                 </button>
               )}
             </div>
 
-            <Calendar
-              ref={calendarRef}
-              events={events}
-              onEventClick={handleEventClick}
-              onDateSelect={handleDateSelect}
-              onDatesSet={loadEvents}
-              onEventDrop={handleEventDrop}
-              onEventResize={handleEventResize}
-            />
+            <div className="flex-1 min-h-0 bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-hidden p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
+              <Calendar
+                ref={calendarRef}
+                events={events}
+                onEventClick={handleEventClick}
+                onDateSelect={handleDateSelect}
+                onDatesSet={loadEvents}
+                onEventDrop={handleEventDrop}
+                onEventResize={handleEventResize}
+              />
+            </div>
           </div>
         </div>
       </div>

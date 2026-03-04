@@ -3,33 +3,33 @@ export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, 
   const mainClubs = clubs.filter(club => !club.parent);
 
   return (
-    <div className="w-64 bg-white dark:bg-gray-800 shadow-lg p-6 min-h-screen border-r border-gray-200 dark:border-gray-700 transition-colors duration-200">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Filter by Club</h2>
+    <div className="w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg p-6 flex flex-col h-full border-r border-gray-200/50 dark:border-gray-800/50 z-10 transition-colors duration-200">
+      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-tight">Filter by Club</h2>
 
       <div className="flex gap-2 mb-4">
         <button
           onClick={onSelectAll}
-          className={`flex-1 text-xs px-2 py-1 rounded transition ${
+          className={`flex-1 text-xs font-semibold px-2 py-1.5 rounded-md transition duration-200 ${
             selectedClubs.length > 0 && selectedClubs.length >= clubs.reduce((acc, club) => acc + 1 + (club.sub_clubs ? club.sub_clubs.length : 0), 0)
-              ? 'bg-primary-600 text-white shadow-md'
-              : 'bg-primary-50 dark:bg-primary-900/10 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 border border-primary-200 dark:border-primary-800'
+              ? 'bg-primary-600 text-white shadow-md hover:bg-primary-700'
+              : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-500/20 border border-primary-200 dark:border-primary-500/30'
           }`}
         >
           All
         </button>
         <button
           onClick={onDeselectAll}
-          className={`flex-1 text-xs px-2 py-1 rounded transition ${
+          className={`flex-1 text-xs font-semibold px-2 py-1.5 rounded-md transition duration-200 ${
             selectedClubs.length === 0
-              ? 'bg-gray-600 text-white shadow-md'
-              : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+              ? 'bg-gray-600 dark:bg-gray-700 text-white shadow-md hover:bg-gray-700 dark:hover:bg-gray-600'
+              : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700'
           }`}
         >
           None
         </button>
       </div>
 
-      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
         {mainClubs.map((club) => (
           <div key={club.id} className="mb-4">
             <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2 flex items-center">
