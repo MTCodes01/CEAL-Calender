@@ -1,10 +1,20 @@
-export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, onSelectAll, onDeselectAll }) {
+export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, onSelectAll, onDeselectAll, onClose }) {
   // Main clubs are those with no parent (the API returns them this way by default in ClubListView)
   const mainClubs = clubs.filter(club => !club.parent);
 
   return (
-    <div className="w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-lg p-6 flex flex-col h-full border-r border-gray-200/50 dark:border-gray-800/50 z-10 transition-colors duration-200">
-      <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 tracking-tight">Filter by Club</h2>
+    <div className="w-full md:w-64 bg-white/95 dark:bg-gray-900/95 md:bg-white/80 md:dark:bg-gray-900/80 backdrop-blur-md shadow-lg p-6 flex flex-col h-full border-r border-gray-200/50 dark:border-gray-800/50 z-10 transition-colors duration-200">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Filter by Club</h2>
+        <button
+          onClick={onClose}
+          className="md:hidden p-2 -mr-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
 
       <div className="flex gap-2 mb-4">
         <button

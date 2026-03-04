@@ -18,6 +18,8 @@ export default function CalendarPage() {
   const navigate = useNavigate();
   const calendarRef = useRef(null);
 
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   useEffect(() => {
     if (!isAuthenticated) {
       navigate('/login');
@@ -231,41 +233,66 @@ export default function CalendarPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
       
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
-        <ClubFilterSidebar
-          clubs={clubs}
-          selectedClubs={selectedClubs}
-          onToggleClub={(clubId) => {
-            setSelectedClubs((prev) =>
-              prev.includes(clubId)
-                ? prev.filter((id) => id !== clubId)
-                : [...prev, clubId]
-            );
-          }}
-          onSelectAll={() => {
-            const allIds = [];
-            clubs.forEach(c => {
-              allIds.push(c.id);
-              if (c.sub_clubs) {
-                c.sub_clubs.forEach(sub => allIds.push(sub.id));
-              }
-            });
-            setSelectedClubs(allIds);
-          }}
-          onDeselectAll={() => setSelectedClubs([])}
-        />
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden relative">
+        {/* Sidebar Overlay for mobile */}
+        {isSidebarOpen && (
+          <div 
+            className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-20 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
 
-        <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50/50 dark:bg-[#0f172a]/50">
-          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl p-6 transition-all duration-300 border border-white/20 dark:border-gray-700/50 min-h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Event Calendar</h1>
+        <div className={`
+          fixed inset-y-0 left-0 z-30 w-64 transform transition-transform duration-300 ease-in-out md:relative md:translate-x-0
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}>
+          <ClubFilterSidebar
+            clubs={clubs}
+            selectedClubs={selectedClubs}
+            onToggleClub={(clubId) => {
+              setSelectedClubs((prev) =>
+                prev.includes(clubId)
+                  ? prev.filter((id) => id !== clubId)
+                  : [...prev, clubId]
+              );
+            }}
+            onSelectAll={() => {
+              const allIds = [];
+              clubs.forEach(c => {
+                allIds.push(c.id);
+                if (c.sub_clubs) {
+                  c.sub_clubs.forEach(sub => allIds.push(sub.id));
+                }
+              });
+              setSelectedClubs(allIds);
+            }}
+            onDeselectAll={() => setSelectedClubs([])}
+            onClose={() => setIsSidebarOpen(false)}
+          />
+        </div>
+
+        <div className="flex-1 p-2 sm:p-4 md:p-6 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50/50 dark:bg-[#0f172a]/50">
+          <div className="bg-white/90 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-xl p-3 sm:p-6 transition-all duration-300 border border-white/20 dark:border-gray-700/50 min-h-full flex flex-col">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                  </svg>
+                </button>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Event Calendar</h1>
+              </div>
+              
               {user?.club && (
                 <button
                   onClick={() => {
                     setSelectedEvent({ start: new Date(), end: new Date() });
                     setShowEventModal(true);
                   }}
-                  className="bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+                  className="w-full sm:w-auto bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
@@ -275,7 +302,7 @@ export default function CalendarPage() {
               )}
             </div>
 
-            <div className="flex-1 min-h-0 bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-hidden p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
+            <div className="flex-1 min-h-[400px] bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-hidden p-1 sm:p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
               <Calendar
                 ref={calendarRef}
                 events={events}

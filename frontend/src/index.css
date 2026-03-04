@@ -320,3 +320,39 @@
 .dark .react-datepicker__input-container input:focus {
   border-color: #6366f1;
 }
+
+/* Responsive FullCalendar adjustments */
+@media (max-width: 640px) {
+  .fc .fc-toolbar {
+    flex-direction: column !important;
+    gap: 1rem !important;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.25rem !important;
+  }
+
+  .fc .fc-button {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Hide view buttons on very small screens to save space, keeping toggle */
+  .fc .fc-header-toolbar .fc-toolbar-chunk:last-child {
+    scale: 0.9;
+  }
+
+  .fc-view-harness {
+    height: 500px !important;
+  }
+}
+
+/* Custom Scrollbar for Dashboard Table */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.3);
+  border-radius: 10px;
+}
