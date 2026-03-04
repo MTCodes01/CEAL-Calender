@@ -39,8 +39,15 @@ export default function CalendarPage() {
       const clubsArray = Array.isArray(data) ? data : (data.results || []);
       const finalClubs = Array.isArray(clubsArray) ? clubsArray : [];
       setClubs(finalClubs);
-      // Select all clubs by default
-      setSelectedClubs(finalClubs.map((c) => c.id));
+      // Select all clubs and their sub-clubs by default
+      const allIds = [];
+      finalClubs.forEach(c => {
+        allIds.push(c.id);
+        if (c.sub_clubs) {
+          c.sub_clubs.forEach(sub => allIds.push(sub.id));
+        }
+      });
+      setSelectedClubs(allIds);
     } catch (error) {
       console.error('Failed to load clubs:', error);
     }

@@ -27,48 +27,71 @@
 /* FullCalendar Button Upgrades */
 .fc .fc-button {
   border-radius: 0.5rem !important;
+  /* Tailwind rounded-lg */
   font-weight: 600 !important;
   text-transform: capitalize !important;
-  padding: 0.4rem 1rem !important;
+  padding: 0.5rem 1.25rem !important;
   transition: all 0.2s ease !important;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  box-shadow: none !important;
   outline: none !important;
-  border: 1px solid transparent !important;
+  border: none !important;
+}
+
+/* Base button styling (for light mode) */
+.fc .fc-button-primary {
+  background-color: #3b82f6 !important;
+  /* Tailwind blue-500 */
+  color: #ffffff !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #2563eb !important;
+  /* Tailwind blue-600 */
+}
+
+/* Active State */
+.fc .fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-primary:not(:disabled):active {
+  background-color: #3b82f6 !important;
+  /* Brand Blue */
+  color: #ffffff !important;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Button Group Styling (Month/Week/Day) */
+.fc .fc-button-group {
+  border-radius: 0.5rem !important;
+  overflow: hidden;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .fc .fc-button-group>.fc-button {
   border-radius: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background-color: #1e293b !important;
+  /* Slate 800 */
+  color: #cbd5e1 !important;
+  /* Slate 300 */
 }
 
-.fc .fc-button-group>.fc-button:first-child {
-  border-top-left-radius: 0.5rem !important;
-  border-bottom-left-radius: 0.5rem !important;
+.fc .fc-button-group>.fc-button:hover {
+  background-color: #334155 !important;
+  /* Slate 700 */
+  color: #f8fafc !important;
+  /* Slate 50 */
 }
 
 .fc .fc-button-group>.fc-button:last-child {
-  border-top-right-radius: 0.5rem !important;
-  border-bottom-right-radius: 0.5rem !important;
+  border-right: none !important;
 }
 
-/* Light mode buttons */
-.fc .fc-button-primary {
-  background-color: #ffffff !important;
-  border-color: #e5e7eb !important;
-  color: #374151 !important;
-}
-
-.fc .fc-button-primary:hover {
-  background-color: #f9fafb !important;
-  border-color: #d1d5db !important;
-  color: #111827 !important;
-}
-
-.fc .fc-button-primary:not(:disabled).fc-button-active,
-.fc .fc-button-primary:not(:disabled):active {
-  background-color: #4f46e5 !important;
-  border-color: #4f46e5 !important;
+/* Active State within Button Group */
+.fc .fc-button-group>.fc-button-primary:not(:disabled).fc-button-active,
+.fc .fc-button-group>.fc-button-primary:not(:disabled):active {
+  background-color: #3b82f6 !important;
+  /* Brand Blue */
   color: #ffffff !important;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06) !important;
+  box-shadow: none !important;
 }
 
 .fc-event {
@@ -208,8 +231,9 @@
 
 .dark .fc .fc-button-primary:not(:disabled).fc-button-active,
 .dark .fc .fc-button-primary:not(:disabled):active {
-  background-color: #4f46e5 !important;
-  border-color: #4f46e5 !important;
+  background-color: #3b82f6 !important;
+  /* Brand Blue */
+  border-color: #3b82f6 !important;
   color: #ffffff !important;
 }
 
