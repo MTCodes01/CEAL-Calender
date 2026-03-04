@@ -9,13 +9,21 @@ export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, 
       <div className="flex gap-2 mb-4">
         <button
           onClick={onSelectAll}
-          className="flex-1 text-xs px-2 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded hover:bg-primary-200 dark:hover:bg-primary-900/50 transition"
+          className={`flex-1 text-xs px-2 py-1 rounded transition ${
+            selectedClubs.length > 0 && selectedClubs.length >= clubs.reduce((acc, club) => acc + 1 + (club.sub_clubs ? club.sub_clubs.length : 0), 0)
+              ? 'bg-primary-600 text-white shadow-md'
+              : 'bg-primary-50 dark:bg-primary-900/10 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 border border-primary-200 dark:border-primary-800'
+          }`}
         >
           All
         </button>
         <button
           onClick={onDeselectAll}
-          className="flex-1 text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+          className={`flex-1 text-xs px-2 py-1 rounded transition ${
+            selectedClubs.length === 0
+              ? 'bg-gray-600 text-white shadow-md'
+              : 'bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+          }`}
         >
           None
         </button>

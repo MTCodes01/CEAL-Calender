@@ -227,7 +227,16 @@ export default function CalendarPage() {
                 : [...prev, clubId]
             );
           }}
-          onSelectAll={() => setSelectedClubs(clubs.map((c) => c.id))}
+          onSelectAll={() => {
+            const allIds = [];
+            clubs.forEach(c => {
+              allIds.push(c.id);
+              if (c.sub_clubs) {
+                c.sub_clubs.forEach(sub => allIds.push(sub.id));
+              }
+            });
+            setSelectedClubs(allIds);
+          }}
           onDeselectAll={() => setSelectedClubs([])}
         />
 
