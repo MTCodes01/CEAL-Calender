@@ -1,4 +1,7 @@
 export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, onSelectAll, onDeselectAll }) {
+  // Main clubs are those with no parent (the API returns them this way by default in ClubListView)
+  const mainClubs = clubs.filter(club => !club.parent);
+
   return (
     <div className="w-64 bg-white dark:bg-gray-800 shadow-lg p-6 min-h-screen border-r border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Filter by Club</h2>
@@ -18,55 +21,54 @@ export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, 
         </button>
       </div>
 
-      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-        {['Cultural', 'FOSS', 'IEDC', 'IEEE', 'ISTE', 'NSS', 'Other', 'Sports', 'TinkerHub'].map((category) => {
-          const categoryClubs = clubs.filter(club => {
-            const s = club.slug;
-            if (category === 'Cultural') return s === 'yavanika';
-            if (category === 'FOSS') return s.startsWith('foss-');
-            if (category === 'IEDC') return s.startsWith('iedc-');
-            if (category === 'IEEE') return s.startsWith('ieee-');
-            if (category === 'ISTE') return s === 'iste';
-            if (category === 'NSS') return s === 'nss';
-            if (category === 'Sports') return s === 'sports';
-            if (category === 'TinkerHub') return s === 'tinkerhub';
+      <div className="space-y-6 max-h-[calc(100vh-200px)] overflow-y-auto pr-2 custom-scrollbar">
+        {mainClubs.map((club) => (
+          <div key={club.id} className="mb-4">
+            <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2 flex items-center">
+              <span className="w-2 h-2 rounded-full mr-2" style={{ backgroundColor: club.color }} />
+              {club.name}
+            </h3>
             
-            // Other: anything not matched above
-            return !s.startsWith('ieee-') && !s.startsWith('foss-') && !s.startsWith('iedc-') && 
-                   !['iste', 'nss', 'tinkerhub', 'yavanika', 'sports'].includes(s);
-          });
+            <div className="space-y-1 ml-2 border-l-2 border-gray-100 dark:border-gray-700 pl-2">
+              {/* Main club checkbox */}
+              <label
+                className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition group"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedClubs.includes(club.id)}
+                  onChange={() => onToggleClub(club.id)}
+                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                />
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex-1 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                  {club.name}
+                </span>
+              </label>
 
-          if (categoryClubs.length === 0) return null;
-
-          return (
-            <div key={category}>
-              <h3 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2 px-2">
-                {category}
-              </h3>
-              <div className="space-y-1">
-                {categoryClubs.map((club) => (
-                  <label
-                    key={club.id}
-                    className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedClubs.includes(club.id)}
-                      onChange={() => onToggleClub(club.id)}
-                      className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <span
-                      className="w-4 h-4 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: club.color }}
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">{club.name}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="mt-4 border-b border-gray-100 dark:border-gray-700 last:border-0" />
+              {/* Sub clubs */}
+              {club.sub_clubs && club.sub_clubs.map((subClub) => (
+                <label
+                  key={subClub.id}
+                  className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition group"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedClubs.includes(subClub.id)}
+                    onChange={() => onToggleClub(subClub.id)}
+                    className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <div 
+                    className="w-3 h-3 rounded-full flex-shrink-0" 
+                    style={{ backgroundColor: subClub.color }}
+                  />
+                  <span className="text-xs text-gray-600 dark:text-gray-400 flex-1 group-hover:text-primary-600 dark:group-hover:text-primary-400">
+                    {subClub.name}
+                  </span>
+                </label>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        ))}
       </div>
     </div>
   );

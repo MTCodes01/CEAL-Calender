@@ -20,9 +20,9 @@ if [[ "$1" == *"gunicorn"* ]] || [[ "$1" == *"runserver"* ]]; then
         python manage.py shell -c "
 from django.contrib.auth import get_user_model;
 User = get_user_model();
-if not User.objects.filter(username='admin').exists():
-    User.objects.create_superuser('admin', 'admin@example.com', 'admin123');
-    print('Superuser created: admin/admin123');
+if not User.objects.filter(email='admin@ceal.com').exists():
+    User.objects.create_superuser('admin', 'admin@ceal.com', 'adminpassword');
+    print('Superuser created: admin@ceal.com/adminpassword');
 else:
     print('Superuser already exists');
 " || true

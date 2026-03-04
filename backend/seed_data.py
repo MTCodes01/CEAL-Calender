@@ -36,77 +36,66 @@ COLORS = [
 
 def create_clubs():
     """
-    Create all clubs with proper hierarchy and colors
+    Create all clubs with proper hierarchy, colors, and order
     """
-    # Parent Clubs
+    # Parent Clubs (Major Clubs)
     parents = [
-        ('ieee', 'IEEE', '#3B82F6'),
-        ('foss', 'FOSS', '#10B981'),
-        ('iedc', 'IEDC', '#F59E0B'),
-        ('other', 'Other', '#6B7280'),
+        ('foss', 'FOSS', '#10B981', 0),
+        ('iedc', 'IEDC', '#F59E0B', 1),
+        ('ieee', 'IEEE', '#3B82F6', 2),
+        ('iste', 'ISTE', '#6366F1', 3),
+        ('tinkerhub', 'TinkerHub', '#EC4899', 4),
+        ('yavanika', 'Yavanika', '#8B5CF6', 5),
+        ('nss', 'NSS', '#EF4444', 6),
+        ('sports', 'Sports', '#F97316', 7),
     ]
 
     parent_map = {}
-    for slug, name, color in parents:
+    for slug, name, color, order in parents:
         club, created = Club.objects.update_or_create(
             slug=slug,
-            defaults={'name': name, 'color': color, 'parent': None}
+            defaults={'name': name, 'color': color, 'parent': None, 'order': order}
         )
         parent_map[slug] = club
         print(f"{'✓' if created else '→'} Parent: {name}")
 
-    # Child Clubs
+    # Child Clubs (Sub-clubs)
     children = [
-        # IEEE Sub-clubs
-        ('ieee-cs', 'IEEE CS', 'ieee'),
-        ('ieee-embs', 'IEEE EMBS', 'ieee'),
-        ('ieee-ias', 'IEEE IAS', 'ieee'),
-        ('ieee-pes', 'IEEE PES', 'ieee'),
-        ('ieee-pels', 'IEEE PELS', 'ieee'),
-        ('ieee-ras', 'IEEE RAS', 'ieee'),
-        ('ieee-sps', 'IEEE SPS', 'ieee'),
-        ('ieee-wie', 'IEEE WIE', 'ieee'),
-        
         # FOSS Sub-clubs
-        ('foss-create101', 'CREATE101', 'foss'),
-        ('foss-embed202', 'EMBED202', 'foss'),
-        ('foss-train303', 'TRAIN303', 'foss'),
-        ('foss-hack404', 'HACK404', 'foss'),
-        ('foss-deploy505', 'DEPLOY505', 'foss'),
+        ('create101', 'CREATE101', 'foss', 0),
+        ('embed202', 'EMBED202', 'foss', 1),
+        ('train303', 'TRAIN303', 'foss', 2),
+        ('hack404', 'HACK404', 'foss', 3),
+        ('deploy505', 'DEPLOY505', 'foss', 4),
         
         # IEDC Sub-clubs
-        ('iedc-edc', 'EDC', 'iedc'),
-        ('iedc-impact-cafe', 'Impact Cafe', 'iedc'),
+        ('edc', 'EDC', 'iedc', 0),
         
-        # Other Clubs (assigned to 'other' parent for grouping, or kept independent if preferred)
-        ('iste', 'ISTE', 'other'),
-        ('tinkerhub', 'TinkerHub', 'other'),
-        ('yavanika', 'Yavanika', 'other'),
-        ('nss', 'NSS', 'other'),
-        ('sports', 'Sports Club', 'other'),
+        # IEEE Sub-clubs
+        ('ieee-cs', 'CS', 'ieee', 0),
+        ('ieee-embs', 'EMBS', 'ieee', 1),
+        ('ieee-ias', 'IAS', 'ieee', 2),
+        ('ieee-pels', 'PELS', 'ieee', 3),
+        ('ieee-pes', 'PES', 'ieee', 4),
+        ('ieee-ras', 'RAS', 'ieee', 5),
+        ('ieee-sps', 'SPS', 'ieee', 6),
+        ('ieee-wie', 'WIE', 'ieee', 7),
     ]
     
-    created_count = 0
-    updated_count = 0
-    
-    for idx, (slug, name, parent_slug) in enumerate(children):
-        # Use a distinct color for children or inherit/derive if needed. 
-        # For now, using the palette cyclically.
-        color = COLORS[idx % len(COLORS)]
+    for slug, name, parent_slug, order in children:
         parent = parent_map.get(parent_slug)
+        # Use a slightly different shade or the same as parent
+        color = parent.color
         
         club, created = Club.objects.update_or_create(
             slug=slug,
-            defaults={'name': name, 'color': color, 'parent': parent}
+            defaults={'name': name, 'color': color, 'parent': parent, 'order': order}
         )
-        
-        if created:
-            created_count += 1
-            print(f"  ✓ Child: {name} -> {parent.name}")
-        else:
-            updated_count += 1
-            print(f"  → Updated: {name} -> {parent.name}")
-    
+        print(f"  {'✓' if created else '→'} Child: {name} -> {parent.name}")
+
+    # Remove old 'other' group if it exists
+    Club.objects.filter(slug='other').delete()
+
     print(f"\n{'='*50}")
     print(f"Total clubs: {Club.objects.count()}")
     print(f"{'='*50}")
