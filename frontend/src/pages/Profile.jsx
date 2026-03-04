@@ -107,17 +107,27 @@ export default function Profile() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Club</label>
-              {user?.club ? (
-                <div
-                  className="px-4 py-3 rounded-lg inline-block text-white font-semibold"
-                  style={{ backgroundColor: user.club.color }}
-                >
-                  {user.club.name}
-                </div>
-              ) : (
-                <p className="text-gray-600 dark:text-gray-400">No club assigned</p>
-              )}
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clubs</label>
+              <div className="flex gap-2">
+                {user?.club ? (
+                  <div
+                    className="px-4 py-3 rounded-lg inline-block text-white font-semibold shadow-sm"
+                    style={{ backgroundColor: user.club.color }}
+                  >
+                    {user.club.name}
+                  </div>
+                ) : (
+                  <p className="text-gray-600 dark:text-gray-400">No main club assigned</p>
+                )}
+                {user?.sub_club && (
+                  <div
+                    className="px-4 py-3 rounded-lg inline-block text-white font-semibold shadow-sm"
+                    style={{ backgroundColor: user.sub_club.color }}
+                  >
+                    {user.sub_club.name}
+                  </div>
+                )}
+              </div>
             </div>
 
             <button
