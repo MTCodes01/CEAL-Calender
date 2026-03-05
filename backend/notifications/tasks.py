@@ -177,7 +177,7 @@ def send_digest_email(user, events):
 
         # Send email
         send_mail(
-            subject=f"Upcoming Events - CEAL Calendar",
+            subject=f"Upcoming Events - CampusCalendar",
             message=(
                 f"You have {len(event_data)} upcoming event(s) across clubs. "
                 f"Visit {settings.FRONTEND_URL} to view details."
