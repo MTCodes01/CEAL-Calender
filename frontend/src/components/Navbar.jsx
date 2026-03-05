@@ -51,9 +51,10 @@ export default function Navbar() {
             <Link to="/calendar" className="flex items-center gap-2">
               <img 
                 src={theme === 'dark' ? '/logo-light.svg' : '/logo-dark.svg'} 
-                alt="Calendar Website Logo" 
+                alt="CampusCalendar Logo" 
                 className="h-8 w-auto object-contain"
               />
+              <span className="text-xl font-bold text-gray-900 dark:text-white">CampusCalendar</span>
             </Link>
           </div>
 
