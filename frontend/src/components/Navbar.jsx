@@ -48,8 +48,12 @@ export default function Navbar() {
       <div className="w-full px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0 flex items-center">
-            <Link to="/calendar" className="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-700 dark:from-primary-400 dark:to-primary-600 tracking-tight hover:opacity-80 transition-opacity">
-              CEAL Calendar
+            <Link to="/calendar" className="flex items-center gap-2">
+              <img 
+                src={theme === 'dark' ? '/logo-light.svg' : '/logo-dark.svg'} 
+                alt="Calendar Website Logo" 
+                className="h-8 w-auto object-contain"
+              />
             </Link>
           </div>
 
