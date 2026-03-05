@@ -7,10 +7,11 @@ class ClubSerializer(serializers.ModelSerializer):
     Serializer for Club model including nested sub-clubs
     """
     sub_clubs = serializers.SerializerMethodField()
+    parent_name = serializers.ReadOnlyField(source='parent.name')
     
     class Meta:
         model = Club
-        fields = ['id', 'slug', 'name', 'color', 'parent', 'order', 'sub_clubs']
+        fields = ['id', 'slug', 'name', 'color', 'parent', 'parent_name', 'order', 'sub_clubs']
         read_only_fields = ['id']
 
     def get_sub_clubs(self, obj):

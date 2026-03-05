@@ -294,12 +294,13 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
     e.title,
     new Date(e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
     new Date(e.end || e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
-    e.club?.name || 'N/A'
+    e.club?.parent_name || e.club?.name || 'N/A',
+    e.club?.parent_name ? (e.club?.name || '-') : '-'
   ]);
 
   doc.autoTable({
     startY: lastY + 15,
-    head: [['ID', 'Event Title', 'Start', 'End', 'Club']],
+    head: [['ID', 'Event Title', 'Start', 'End', 'Main Club', 'Sub Club']],
     body: tableRows,
     theme: 'grid',
     headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
