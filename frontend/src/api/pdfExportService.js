@@ -1,0 +1,313 @@
+import { jsPDF } from 'jspdf';
+import 'jspdf-autotable';
+
+/**
+ * Helper to convert color hex to RGB array
+ */
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex || '#3b82f6');
+  return result ? [
+    parseInt(result[1], 16),
+    parseInt(result[2], 16),
+    parseInt(result[3], 16)
+  ] : [59, 130, 246];
+};
+
+/**
+ * Helper to get contrast color (white or black) based on background luminance
+ */
+const getContrastColor = (rgb) => {
+  const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
+  return luminance > 0.5 ? [0, 0, 0] : [255, 255, 255];
+};
+
+/**
+ * Draws a traditional calendar grid for Month View with badge-style IDs
+ */
+const drawMonthGrid = (doc, events, dateRange, options) => {
+  const { margin, gridTop, gridWidth, pageWidth } = options;
+  const start = new Date(dateRange.start);
+  const end = new Date(dateRange.end);
+  
+  // Title
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  const monthTitle = start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+  doc.text(monthTitle, pageWidth / 2, 20, { align: 'center' });
+
+  // Grid Settings
+  const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const colWidth = gridWidth / 7;
+  
+  // Calculate Rows
+  const diffTime = Math.abs(end - start);
+  const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const rowCount = Math.ceil(totalDays / 7);
+  const rowHeight = Math.min(25, 140 / rowCount);
+  const gridHeight = rowCount * rowHeight;
+
+  // Grid Background
+  doc.setFillColor(30, 41, 59); // slate-800
+  doc.rect(margin, gridTop, gridWidth, gridHeight, 'F');
+  
+  // Day Headers
+  doc.setDrawColor(51, 65, 85); 
+  doc.setLineWidth(0.1);
+  doc.setFontSize(8);
+  doc.setTextColor(148, 163, 184);
+  dayLabels.forEach((label, i) => {
+    const x = margin + i * colWidth;
+    doc.text(label, x + colWidth / 2, gridTop + 5, { align: 'center' });
+    doc.line(x, gridTop, x, gridTop + gridHeight);
+  });
+  doc.line(margin + gridWidth, gridTop, margin + gridWidth, gridTop + gridHeight);
+
+  // Render Day Cells
+  for (let r = 0; r <= rowCount; r++) {
+    const y = gridTop + r * rowHeight;
+    doc.line(margin, y, margin + gridWidth, y);
+    
+    if (r < rowCount) {
+      for (let c = 0; c < 7; c++) {
+        const dIdx = r * 7 + c;
+        if (dIdx < totalDays) {
+          const d = new Date(start);
+          d.setDate(d.getDate() + dIdx);
+          const x = margin + c * colWidth;
+          
+          // Date Number
+          doc.setFontSize(6);
+          doc.setTextColor(100, 116, 139);
+          doc.text(`${d.getDate()}`, x + colWidth - 2, y + 4, { align: 'right' });
+          
+          // Render events as small square badges in a grid
+          const dayEvents = events.filter(e => {
+            const eStart = new Date(e.start);
+            const eEnd = new Date(e.end || e.start);
+            const dStart = new Date(d); dStart.setHours(0,0,0,0);
+            const dEnd = new Date(d); dEnd.setHours(23,59,59,999);
+            return eStart <= dEnd && eEnd >= dStart;
+          });
+
+          // Draw Badge Grid
+          const badgeSize = 5;
+          const badgeMargin = 1;
+          const startX = x + 2;
+          const startY = y + 6;
+          const badgesPerRow = Math.floor((colWidth - 4) / (badgeSize + badgeMargin));
+
+          dayEvents.forEach((e, eIdx) => {
+            const row = Math.floor(eIdx / badgesPerRow);
+            const col = eIdx % badgesPerRow;
+            
+            const bx = startX + col * (badgeSize + badgeMargin);
+            const by = startY + row * (badgeSize + badgeMargin);
+            
+            // Limit drawing to cell area
+            if (by + badgeSize < y + rowHeight - 2) {
+              const rgb = hexToRgb(e.club?.color);
+              doc.setFillColor(...rgb);
+              doc.rect(bx, by, badgeSize, badgeSize, 'F');
+              
+              const textColor = getContrastColor(rgb);
+              doc.setTextColor(...textColor);
+              doc.setFontSize(4);
+              doc.setFont("helvetica", "bold");
+              doc.text(`${e.id}`, bx + badgeSize / 2, by + badgeSize / 2 + 1.2, { align: 'center' });
+              doc.setFont("helvetica", "normal");
+            }
+          });
+        }
+      }
+    }
+  }
+
+  return gridTop + gridHeight;
+};
+
+/**
+ * Draws the high-fidelity vertical timeline (Week & Day Views)
+ */
+const drawScheduleTimeline = (doc, events, dateRange, options) => {
+  const { margin, gridTop, gridWidth, pageWidth } = options;
+  const gutterWidth = 18;
+  const timelineHeight = 150;
+  const hourHeight = timelineHeight / 24;
+  const allDayHeight = 10;
+  
+  const startLimit = new Date(dateRange.start);
+  const endLimit = new Date(dateRange.end);
+  
+  // Title
+  doc.setFontSize(22);
+  doc.setTextColor(255, 255, 255);
+  const diffTime = Math.abs(endLimit - startLimit);
+  const actualDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+  
+  const titleText = actualDays > 1 
+    ? `${startLimit.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - ${endLimit.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}`
+    : startLimit.toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+  doc.text(titleText, pageWidth / 2, 20, { align: 'center' });
+
+  // Surfaces
+  doc.setFillColor(30, 41, 59); // slate-800
+  doc.rect(margin, gridTop, gridWidth, timelineHeight + allDayHeight, 'F');
+  doc.setFillColor(15, 23, 42); // slate-900
+  doc.rect(margin, gridTop, gutterWidth, timelineHeight + allDayHeight, 'F');
+
+  doc.setDrawColor(51, 65, 85); 
+  doc.setLineWidth(0.1);
+  doc.line(margin, gridTop + allDayHeight, margin + gridWidth, gridTop + allDayHeight);
+  
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text('all-day', margin + 2, gridTop + 6);
+
+  for (let i = 0; i <= 24; i++) {
+    const y = gridTop + allDayHeight + (i * hourHeight);
+    doc.line(margin + gutterWidth, y, margin + gridWidth, y);
+    const label = i === 0 ? '12 am' : i < 12 ? `${i} am` : i === 12 ? '12 pm' : `${i - 12} pm`;
+    if (i < 24) {
+      doc.setFontSize(7);
+      doc.setTextColor(148, 163, 184);
+      doc.text(label, margin + 2, y + 2);
+    }
+  }
+
+  const colWidth = (gridWidth - gutterWidth) / actualDays;
+
+  for (let dIdx = 0; dIdx < actualDays; dIdx++) {
+    const currentDayStart = new Date(startLimit);
+    currentDayStart.setDate(currentDayStart.getDate() + dIdx);
+    currentDayStart.setHours(0,0,0,0);
+    const dayX = margin + gutterWidth + (dIdx * colWidth);
+    if (dIdx > 0) doc.line(dayX, gridTop, dayX, gridTop + timelineHeight + allDayHeight);
+
+    doc.setFontSize(actualDays > 7 ? 4 : 6);
+    doc.setTextColor(148, 163, 184);
+    const dayLabel = actualDays > 7 
+      ? `${currentDayStart.getDate()}`
+      : currentDayStart.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
+    doc.text(dayLabel, dayX + (colWidth / 2), gridTop - 3, { align: 'center' });
+
+    const currentDayEnd = new Date(currentDayStart);
+    currentDayEnd.setHours(23, 59, 59, 999);
+
+    const dayEvents = events.filter(e => {
+      const eStart = new Date(e.start);
+      const eEnd = new Date(e.end || e.start);
+      return eStart <= currentDayEnd && eEnd >= currentDayStart;
+    }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    const lanes = [];
+    const tEvents = dayEvents.filter(e => !e.allDay);
+    const adEvents = dayEvents.filter(e => e.allDay);
+
+    tEvents.forEach(e => {
+      const eStart = new Date(e.start);
+      const eEnd = new Date(e.end || e.start);
+      const startMin = eStart < currentDayStart ? 0 : (eStart.getHours() * 60 + eStart.getMinutes());
+      const endMin = eEnd > currentDayEnd ? 1440 : (eEnd.getHours() * 60 + eEnd.getMinutes() || (startMin + 45));
+      let lIdx = lanes.findIndex(lEnd => lEnd <= startMin);
+      if (lIdx === -1) {
+        lanes.push(endMin);
+        lIdx = lanes.length - 1;
+      } else {
+        lanes[lIdx] = endMin;
+      }
+      e._lane = lIdx;
+      e._sMin = startMin;
+      e._eMin = endMin;
+    });
+
+    const totalLanes = lanes.length || 1;
+    const lWidth = (colWidth - 0.2) / totalLanes;
+
+    tEvents.forEach(e => {
+      const y = gridTop + allDayHeight + (e._sMin / 60) * hourHeight;
+      const h = Math.max(2, ((e._eMin - e._sMin) / 60) * hourHeight);
+      const x = dayX + (e._lane * lWidth) + 0.1;
+      const w = lWidth - 0.2;
+
+      const rgb = hexToRgb(e.club?.color);
+      doc.setFillColor(...rgb);
+      doc.rect(x, y, w, h, 'F');
+      
+      const textColor = getContrastColor(rgb);
+      doc.setTextColor(...textColor);
+      doc.setFontSize(Math.min(6, lWidth * 1.5));
+      if (h > 3 && w > 2) {
+        doc.setFont("helvetica", "bold");
+        doc.text(`#${e.id}`, x + (w / 2), y + (h / 2) + 0.8, { align: 'center' });
+      }
+    });
+
+    if (adEvents.length) {
+      const adW = (colWidth - 0.2) / adEvents.length;
+      adEvents.forEach((e, i) => {
+        const rgb = hexToRgb(e.club?.color);
+        doc.setFillColor(...rgb);
+        doc.rect(dayX + (i * adW) + 0.1, gridTop + 2, adW - 0.1, 6, 'F');
+        doc.setTextColor(...getContrastColor(rgb));
+        doc.setFontSize(Math.min(5, adW * 1.5));
+        doc.text(`#${e.id}`, dayX + (i * adW) + (adW / 2), gridTop + 6, { align: 'center' });
+      });
+    }
+  }
+
+  return gridTop + timelineHeight + allDayHeight;
+};
+
+/**
+ * Main Export Service
+ */
+export const exportToPDF = async (events, selectedClubs, dateRange, viewType) => {
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  
+  doc.setFillColor(15, 23, 42); 
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+  const options = {
+    margin: 12,
+    gridTop: 40,
+    gridWidth: pageWidth - 24,
+    pageWidth: pageWidth
+  };
+
+  const filteredEvents = events.filter(e => {
+    const s = new Date(e.start);
+    const end = new Date(e.end || e.start);
+    return s <= new Date(dateRange.end) && end >= new Date(dateRange.start);
+  });
+
+  let lastY;
+  if (viewType === 'dayGridMonth') {
+    lastY = drawMonthGrid(doc, filteredEvents, dateRange, options);
+  } else {
+    lastY = drawScheduleTimeline(doc, filteredEvents, dateRange, options);
+  }
+
+  const tableRows = filteredEvents.map(e => [
+    e.id,
+    e.title,
+    new Date(e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
+    new Date(e.end || e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
+    e.club?.name || 'N/A'
+  ]);
+
+  doc.autoTable({
+    startY: lastY + 15,
+    head: [['ID', 'Event Title', 'Start', 'End', 'Club']],
+    body: tableRows,
+    theme: 'grid',
+    headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
+    bodyStyles: { fillColor: [15, 23, 42], textColor: [203, 213, 225], fontSize: 7 },
+    alternateRowStyles: { fillColor: [17, 24, 39] },
+    styles: { lineColor: [51, 65, 85] },
+    margin: { left: 12, right: 12 }
+  });
+
+  doc.save(`Calendar_${viewType}_${new Date().toISOString().split('T')[0]}.pdf`);
+};

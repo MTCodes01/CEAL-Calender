@@ -6,6 +6,7 @@ import EventModal from '../components/EventModal';
 import ClubFilterSidebar from '../components/ClubFilterSidebar';
 import Navbar from '../components/Navbar';
 import api from '../api/client';
+import { exportToPDF } from '../api/pdfExportService';
 
 export default function CalendarPage() {
   const [events, setEvents] = useState([]);
@@ -208,6 +209,22 @@ export default function CalendarPage() {
     }
   };
 
+  const handleExportPDF = async () => {
+    try {
+      const calendarApi = calendarRef.current.getApi();
+      const currentView = calendarApi.view;
+      const dateRange = {
+        start: currentView.activeStart,
+        end: currentView.activeEnd
+      };
+
+      await exportToPDF(events, selectedClubs, dateRange, currentView.type);
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+      alert('Error exporting PDF. Please try again.');
+    }
+  };
+
   const canEditEvent = (event) => {
     if (!user) return false;
     if (user.is_superuser) return true;
@@ -286,20 +303,32 @@ export default function CalendarPage() {
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Event Calendar</h1>
               </div>
               
-              {user?.club && (
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
                 <button
-                  onClick={() => {
-                    setSelectedEvent({ start: new Date(), end: new Date() });
-                    setShowEventModal(true);
-                  }}
-                  className="w-full sm:w-auto bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  onClick={handleExportPDF}
+                  className="flex-1 sm:flex-none bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 px-4 py-2.5 rounded-xl font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Create Event
+                  Export PDF
                 </button>
-              )}
+
+                {user?.club && (
+                  <button
+                    onClick={() => {
+                      setSelectedEvent({ start: new Date(), end: new Date() });
+                      setShowEventModal(true);
+                    }}
+                    className="flex-1 sm:flex-none bg-primary-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-primary-700 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Create Event
+                  </button>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 min-h-[400px] bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-hidden p-1 sm:p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
