@@ -62,23 +62,23 @@
 .fc .fc-button-group {
   border-radius: 0.5rem !important;
   overflow: hidden;
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
 .fc .fc-button-group>.fc-button {
   border-radius: 0 !important;
-  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
-  background-color: #1e293b !important;
-  /* Slate 800 */
-  color: #cbd5e1 !important;
-  /* Slate 300 */
+  border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+  background-color: #ffffff !important;
+  color: #475569 !important;
+  /* Slate 600 */
 }
 
 .fc .fc-button-group>.fc-button:hover {
-  background-color: #334155 !important;
-  /* Slate 700 */
-  color: #f8fafc !important;
+  background-color: #f8fafc !important;
   /* Slate 50 */
+  color: #1e293b !important;
+  /* Slate 800 */
 }
 
 .fc .fc-button-group>.fc-button:last-child {
@@ -229,12 +229,35 @@
   color: #f8fafc !important;
 }
 
+.dark .fc .fc-button-group {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fc .fc-button-group>.fc-button {
+  background-color: #1e293b !important;
+  /* Slate 800 */
+  color: #cbd5e1 !important;
+  /* Slate 300 */
+  border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .fc .fc-button-group>.fc-button:hover {
+  background-color: #334155 !important;
+  /* Slate 700 */
+  color: #f8fafc !important;
+  /* Slate 50 */
+}
+
 .dark .fc .fc-button-primary:not(:disabled).fc-button-active,
 .dark .fc .fc-button-primary:not(:disabled):active {
   background-color: #3b82f6 !important;
   /* Brand Blue */
   border-color: #3b82f6 !important;
   color: #ffffff !important;
+}
+
+.dark .fc-button-group .fc-button:last-child {
+  border-right: none !important;
 }
 
 .dark .fc .fc-button-primary:disabled {

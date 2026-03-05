@@ -19,20 +19,20 @@ export default function ClubFilterSidebar({ clubs, selectedClubs, onToggleClub, 
       <div className="flex gap-2 mb-4">
         <button
           onClick={onSelectAll}
-          className={`flex-1 text-xs font-semibold px-2 py-1.5 rounded-md transition duration-200 ${
+          className={`flex-1 text-xs font-bold px-3 py-2 rounded-lg transition-all duration-300 transform active:scale-95 ${
             selectedClubs.length > 0 && selectedClubs.length >= clubs.reduce((acc, club) => acc + 1 + (club.sub_clubs ? club.sub_clubs.length : 0), 0)
-              ? 'bg-primary-600 text-white shadow-md hover:bg-primary-700'
-              : 'bg-primary-50 dark:bg-primary-500/10 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-500/20 border border-primary-200 dark:border-primary-500/30'
+              ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25 hover:bg-primary-700'
+              : 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/30 border border-primary-200 dark:border-primary-800 shadow-sm'
           }`}
         >
           All
         </button>
         <button
           onClick={onDeselectAll}
-          className={`flex-1 text-xs font-semibold px-2 py-1.5 rounded-md transition duration-200 ${
+          className={`flex-1 text-xs font-bold px-3 py-2 rounded-lg transition-all duration-300 transform active:scale-95 ${
             selectedClubs.length === 0
-              ? 'bg-gray-600 dark:bg-gray-700 text-white shadow-md hover:bg-gray-700 dark:hover:bg-gray-600'
-              : 'bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700'
+              ? 'bg-gray-800 dark:bg-gray-700 text-white shadow-lg shadow-gray-900/20 hover:bg-gray-900 dark:hover:bg-gray-600'
+              : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50 border border-gray-200 dark:border-gray-800 shadow-sm'
           }`}
         >
           None
