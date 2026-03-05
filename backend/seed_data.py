@@ -40,14 +40,16 @@ def create_clubs():
     """
     # Parent Clubs (Major Clubs)
     parents = [
-        ('foss', 'FOSS', '#10B981', 0),
-        ('iedc', 'IEDC', '#F59E0B', 1),
-        ('ieee', 'IEEE', '#3B82F6', 2),
-        ('iste', 'ISTE', '#6366F1', 3),
-        ('tinkerhub', 'TinkerHub', '#EC4899', 4),
-        ('yavanika', 'Yavanika', '#8B5CF6', 5),
-        ('nss', 'NSS', '#EF4444', 6),
-        ('sports', 'Sports', '#F97316', 7),
+        ('d-ceal', 'DAKSHA', '#EF4444', 0),    # Red
+        ('y-ceal', 'YANTHRA', '#10B981', 1),   # Green
+        ('foss', 'FOSS', '#14B8A6', 2),        # Teal/Green
+        ('iedc', 'IEDC', '#F59E0B', 3),        # Amber
+        ('ieee', 'IEEE', '#3B82F6', 4),        # Blue
+        ('iste', 'ISTE', '#6366F1', 5),        # indigo
+        ('tinkerhub', 'TinkerHub', '#EC4899', 6), # Pink
+        ('yavanika', 'Yavanika', '#8B5CF6', 7),   # Purple
+        ('nss', 'NSS', '#EF4444', 8),          # Red
+        ('sports', 'Sports', '#F97316', 9),     # Orange
     ]
 
     parent_map = {}
@@ -60,32 +62,33 @@ def create_clubs():
         print(f"{'✓' if created else '→'} Parent: {name}")
 
     # Child Clubs (Sub-clubs)
+    # Format: (slug, name, parent_slug, order, color_override)
     children = [
         # FOSS Sub-clubs
-        ('create101', 'CREATE101', 'foss', 0),
-        ('embed202', 'EMBED202', 'foss', 1),
-        ('train303', 'TRAIN303', 'foss', 2),
-        ('hack404', 'HACK404', 'foss', 3),
-        ('deploy505', 'DEPLOY505', 'foss', 4),
+        ('create101', 'CREATE101', 'foss', 0, '#EF4444'),  # Red
+        ('embed202', 'EMBED202', 'foss', 1, '#F59E0B'),  # Yellow
+        ('train303', 'TRAIN303', 'foss', 2, '#3B82F6'),  # Blue
+        ('hack404', 'HACK404', 'foss', 3, '#10B981'),   # Green
+        ('deploy505', 'DEPLOY505', 'foss', 4, '#EC4899'),  # Pink/Purple
         
         # IEDC Sub-clubs
-        ('edc', 'EDC', 'iedc', 0),
+        ('edc', 'EDC', 'iedc', 0, None),
         
         # IEEE Sub-clubs
-        ('ieee-cs', 'CS', 'ieee', 0),
-        ('ieee-embs', 'EMBS', 'ieee', 1),
-        ('ieee-ias', 'IAS', 'ieee', 2),
-        ('ieee-pels', 'PELS', 'ieee', 3),
-        ('ieee-pes', 'PES', 'ieee', 4),
-        ('ieee-ras', 'RAS', 'ieee', 5),
-        ('ieee-sps', 'SPS', 'ieee', 6),
-        ('ieee-wie', 'WIE', 'ieee', 7),
+        ('ieee-cs', 'CS', 'ieee', 0, None),
+        ('ieee-embs', 'EMBS', 'ieee', 1, None),
+        ('ieee-ias', 'IAS', 'ieee', 2, None),
+        ('ieee-pels', 'PELS', 'ieee', 3, None),
+        ('ieee-pes', 'PES', 'ieee', 4, None),
+        ('ieee-ras', 'RAS', 'ieee', 5, None),
+        ('ieee-sps', 'SPS', 'ieee', 6, None),
+        ('ieee-wie', 'WIE', 'ieee', 7, None),
     ]
     
-    for slug, name, parent_slug, order in children:
+    for slug, name, parent_slug, order, color_override in children:
         parent = parent_map.get(parent_slug)
         # Use a slightly different shade or the same as parent
-        color = parent.color
+        color = color_override if color_override else parent.color
         
         club, created = Club.objects.update_or_create(
             slug=slug,
