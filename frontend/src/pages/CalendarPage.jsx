@@ -113,7 +113,7 @@ export default function CalendarPage() {
   };
 
   const handleDateSelect = (start, end) => {
-    if (user?.club) {
+    if (user?.club || user?.sub_club) {
       setSelectedEvent({ start, end });
       setShowEventModal(true);
     }
@@ -234,13 +234,18 @@ export default function CalendarPage() {
     
     if (!eventClub) return false;
     
-    // Strict check matching backend:
-    // If user has a sub_club, they can ONLY edit sub_club events.
-    // If user has NO sub_club, they can edit main club events.
+    // Sub-club role: can ONLY edit their specific sub-club's events
     if (user.sub_club) {
       return eventClub.id === user.sub_club.id;
-    } else if (user.club) {
-      return eventClub.id === user.club.id;
+    }
+
+    // Main-club role: can edit own club's events AND any direct sub-club events
+    if (user.club) {
+      // Own club's event
+      if (eventClub.id === user.club.id) return true;
+      // Event belongs to a direct sub-club of the user's main club
+      const parentId = eventClub.parent?.id ?? eventClub.parent;
+      if (parentId && parentId === user.club.id) return true;
     }
     
     return false;
@@ -314,7 +319,7 @@ export default function CalendarPage() {
                   Export PDF
                 </button>
 
-                {user?.club && (
+                {(user?.club || user?.sub_club) && (
                   <button
                     onClick={() => {
                       setSelectedEvent({ start: new Date(), end: new Date() });
@@ -353,6 +358,7 @@ export default function CalendarPage() {
           onClose={handleModalClose}
           onSave={handleEventSaved}
           onDelete={handleEventDeleted}
+          clubs={clubs}
         />
       )}
     </div>

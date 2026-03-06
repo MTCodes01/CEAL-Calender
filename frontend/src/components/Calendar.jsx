@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { getContrastColor } from '../utils/colorUtils';
 
 const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
@@ -30,6 +31,7 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
       created_by_name: event.created_by_name,
     },
   }));
+
 
   return (
     <FullCalendar
@@ -77,11 +79,13 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
         }
       }}
       eventContent={(eventInfo) => {
+        const bgColor = eventInfo.event.backgroundColor;
+        const textColor = getContrastColor(bgColor);
         if (eventInfo.view.type === 'dayGridMonth') {
           return (
             <div 
-              className="px-2 py-0.5 rounded text-xs font-medium truncate text-white w-full text-center"
-              style={{ backgroundColor: eventInfo.event.backgroundColor }}
+              className="px-2 py-0.5 rounded text-xs font-medium truncate w-full text-center"
+              style={{ backgroundColor: bgColor, color: textColor }}
             >
               {eventInfo.event.title}
             </div>
@@ -90,21 +94,29 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
         return (
           <div className="p-1 cursor-pointer h-full flex flex-col overflow-hidden">
             <div className="flex justify-between items-start mb-0.5">
-              <div className="text-xs font-bold text-white">{eventInfo.timeText}</div>
+              <div className="text-xs font-bold truncate" style={{ color: textColor }}>{eventInfo.timeText}</div>
               {eventInfo.event.extendedProps.club && (
-                <div className="text-[10px] bg-white/20 px-1 rounded text-white truncate max-w-[50%]">
+                <div
+                  className="text-[10px] px-1.5 py-0.5 rounded truncate max-w-[55%] font-medium"
+                  style={{
+                    color: textColor,
+                    border: `1px solid ${textColor === '#000000' ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.5)'}`,
+                    boxShadow: `0 1px 3px rgba(0,0,0,0.25)`,
+                    backgroundColor: textColor === '#000000' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.15)',
+                  }}
+                >
                   {eventInfo.event.extendedProps.club.name}
                 </div>
               )}
             </div>
-            <div className="font-semibold text-xs truncate text-white mb-0.5">{eventInfo.event.title}</div>
+            <div className="font-semibold text-xs truncate mb-0.5" style={{ color: textColor }}>{eventInfo.event.title}</div>
             {eventInfo.event.extendedProps.location && (
-              <div className="text-xs opacity-90 text-white truncate mb-0.5">
+              <div className="text-xs truncate mb-0.5" style={{ color: textColor, opacity: 0.85 }}>
                 📍 {eventInfo.event.extendedProps.location}
               </div>
             )}
             {eventInfo.event.extendedProps.description && (
-              <div className="text-[10px] opacity-80 text-white truncate">
+              <div className="text-[10px] truncate" style={{ color: textColor, opacity: 0.75 }}>
                 {eventInfo.event.extendedProps.description}
               </div>
             )}

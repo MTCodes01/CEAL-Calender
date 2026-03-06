@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import api from '../api/client';
+import { getContrastColor } from '../utils/colorUtils';
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
@@ -111,9 +112,14 @@ export default function Profile() {
               <div className="flex gap-2">
                 {user?.club ? (
                   <div
-                    className="px-4 py-3 rounded-lg inline-block text-white font-semibold shadow-sm"
-                    style={{ backgroundColor: user.club.color }}
+                    className="px-4 py-3 rounded-lg inline-flex items-center gap-2 font-semibold shadow-md text-sm"
+                    style={{
+                      backgroundColor: user.club.color,
+                      color: getContrastColor(user.club.color),
+                      boxShadow: `0 2px 8px ${user.club.color}55`,
+                    }}
                   >
+                    <span className="w-2 h-2 rounded-full opacity-70" style={{ backgroundColor: getContrastColor(user.club.color) }} />
                     {user.club.name}
                   </div>
                 ) : (
@@ -121,9 +127,14 @@ export default function Profile() {
                 )}
                 {user?.sub_club && (
                   <div
-                    className="px-4 py-3 rounded-lg inline-block text-white font-semibold shadow-sm"
-                    style={{ backgroundColor: user.sub_club.color }}
+                    className="px-4 py-3 rounded-lg inline-flex items-center gap-2 font-semibold shadow-md text-sm"
+                    style={{
+                      backgroundColor: user.sub_club.color,
+                      color: getContrastColor(user.sub_club.color),
+                      boxShadow: `0 2px 8px ${user.sub_club.color}55`,
+                    }}
                   >
+                    <span className="w-2 h-2 rounded-full opacity-70" style={{ backgroundColor: getContrastColor(user.sub_club.color) }} />
                     {user.sub_club.name}
                   </div>
                 )}

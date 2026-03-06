@@ -3,9 +3,10 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { getContrastColor } from '../utils/colorUtils';
 
-export default function EventModal({ event, canEdit, onClose, onSave, onDelete }) {
-  const {user } = useAuth();
+export default function EventModal({ event, canEdit, onClose, onSave, onDelete, clubs = [] }) {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,6 +18,20 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
   const [error, setError] = useState('');
   const isEditMode = !!event?.id;
 
+  // Determine which clubs a main-club user can create events for
+  // (their own main club + its direct sub-clubs)
+  const isMainClubRole = !user?.is_superuser && user?.club && !user?.sub_club;
+  const creatableClubs = isMainClubRole
+    ? [
+        user.club,
+        ...clubs
+          .flatMap(c => c.sub_clubs || [])
+          .filter(sc => sc.parent === user.club.id || sc.parent?.id === user.club.id),
+      ]
+    : [];
+
+  const [selectedClubId, setSelectedClubId] = useState(null);
+
   useEffect(() => {
     if (event) {
       setFormData({
@@ -26,6 +41,10 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
         end: event.end ? new Date(event.end) : new Date(),
         location: event.location || '',
       });
+    }
+    // Default club selection to user's main club on open
+    if (!isEditMode && isMainClubRole) {
+      setSelectedClubId(user.club.id);
     }
   }, [event]);
 
@@ -38,7 +57,12 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
       if (isEditMode) {
         await api.put(`/api/events/${event.id}/`, formData);
       } else {
-        await api.post('/api/events/', formData);
+        // Include club_id when main-club user picks a target club
+        const payload = { ...formData };
+        if (isMainClubRole && selectedClubId) {
+          payload.club_id = selectedClubId;
+        }
+        await api.post('/api/events/', payload);
       }
       onSave();
     } catch (err) {
@@ -91,11 +115,19 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">by {event.created_by_name}</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Club</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Club</label>
                 <div
-                  className="px-4 py-2 rounded-lg inline-block text-white font-semibold"
-                  style={{ backgroundColor: event.club.color }}
+                  className="px-4 py-2 rounded-lg inline-flex items-center gap-2 font-semibold text-sm shadow-md"
+                  style={{
+                    backgroundColor: event.club.color,
+                    color: getContrastColor(event.club.color),
+                    boxShadow: `0 2px 8px ${event.club.color}55`,
+                  }}
                 >
+                  <span
+                    className="w-2 h-2 rounded-full inline-block opacity-70"
+                    style={{ backgroundColor: getContrastColor(event.club.color) }}
+                  />
                   {event.club.name}
                 </div>
               </div>
@@ -126,6 +158,30 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete }
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
               </div>
+
+              {/* Club selector — only shown to main-club role when creating a new event */}
+              {!isEditMode && isMainClubRole && creatableClubs.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Club *</label>
+                  <div className="flex flex-wrap gap-2">
+                    {creatableClubs.map(c => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setSelectedClubId(c.id)}
+                        className={`px-3 py-1.5 rounded-lg text-sm font-semibold border-2 transition-all duration-150 ${
+                          selectedClubId === c.id
+                            ? 'text-white border-transparent shadow-md'
+                            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600 hover:border-gray-400'
+                        }`}
+                        style={selectedClubId === c.id ? { backgroundColor: c.color, borderColor: c.color } : {}}
+                      >
+                        {c.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location *</label>

@@ -37,11 +37,15 @@ class EventSerializer(serializers.ModelSerializer):
 
 class EventCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating events (club is auto-filled from user)
+    Serializer for creating events.
+    club is auto-filled from user, but main-club users may optionally supply
+    club_id to target one of their sub-clubs.
     """
+    club_id = serializers.IntegerField(required=False, write_only=True)
+
     class Meta:
         model = Event
-        fields = ['title', 'description', 'start', 'end', 'location']
+        fields = ['title', 'description', 'start', 'end', 'location', 'club_id']
     
     def validate(self, data):
         """

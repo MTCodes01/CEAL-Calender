@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import ThemeToggle from './ThemeToggle';
+import { getContrastColor } from '../utils/colorUtils';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -79,16 +80,16 @@ export default function Navbar() {
                       <div className="flex flex-wrap justify-end gap-1 mt-1">
                         {user.club && (
                           <span 
-                            className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-[24px] shadow-sm uppercase tracking-wider text-white whitespace-nowrap"
-                            style={{ backgroundColor: user.club.color }}
+                            className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-[24px] shadow-sm uppercase tracking-wider whitespace-nowrap"
+                            style={{ backgroundColor: user.club.color, color: getContrastColor(user.club.color) }}
                           >
                             {user.club.name}
                           </span>
                         )}
                         {user.sub_club && (
                           <span 
-                            className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-[24px] shadow-sm uppercase tracking-wider text-white whitespace-nowrap"
-                            style={{ backgroundColor: user.sub_club.color }}
+                            className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-[24px] shadow-sm uppercase tracking-wider whitespace-nowrap"
+                            style={{ backgroundColor: user.sub_club.color, color: getContrastColor(user.sub_club.color) }}
                           >
                             {user.sub_club.name}
                           </span>
@@ -143,16 +144,16 @@ export default function Navbar() {
                 <div className="flex flex-wrap gap-1 mt-1">
                   {user.club && (
                     <span 
-                      className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full text-white uppercase"
-                      style={{ backgroundColor: user.club.color }}
+                      className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase"
+                      style={{ backgroundColor: user.club.color, color: getContrastColor(user.club.color) }}
                     >
                       {user.club.name}
                     </span>
                   )}
                   {user.sub_club && (
                     <span 
-                      className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full text-white uppercase"
-                      style={{ backgroundColor: user.sub_club.color }}
+                      className="text-[8px] font-extrabold px-1.5 py-0.5 rounded-full uppercase"
+                      style={{ backgroundColor: user.sub_club.color, color: getContrastColor(user.sub_club.color) }}
                     >
                       {user.sub_club.name}
                     </span>

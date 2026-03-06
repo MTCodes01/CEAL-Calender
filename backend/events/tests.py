@@ -218,3 +218,166 @@ class EventFilteringTests(TestCase):
         results = response.data if isinstance(response.data, list) else response.data.get('results', [])
         for event in results:
             self.assertEqual(event['club']['id'], self.club2.id)
+
+
+class MainClubRoleTests(TestCase):
+    """
+    Test that main-club role users can manage events for their club
+    AND all direct sub-clubs, while still being blocked from other clubs.
+    """
+
+    def setUp(self):
+        self.client = APIClient()
+        # Main club
+        self.main_club = Club.objects.create(slug='cs', name='CS Club', color='#3B82F6')
+        # Sub-club of main_club
+        self.sub_club = Club.objects.create(
+            slug='cs-ai', name='CS AI Sub-club', color='#8B5CF6',
+            parent=self.main_club
+        )
+        # Completely unrelated club
+        self.other_club = Club.objects.create(slug='ee', name='EE Club', color='#EF4444')
+
+        # Main-club role user (club set, sub_club is null)
+        self.main_user = User.objects.create_user(
+            email='mainuser@example.com',
+            username='mainuser',
+            password='Pass123!',
+            club=self.main_club,
+        )
+        # Sub-club role user
+        self.sub_user = User.objects.create_user(
+            email='subuser@example.com',
+            username='subuser',
+            password='Pass123!',
+            club=self.main_club,
+            sub_club=self.sub_club,
+        )
+        # Unrelated club user
+        self.other_user = User.objects.create_user(
+            email='other@example.com',
+            username='other',
+            password='Pass123!',
+            club=self.other_club,
+        )
+
+        self.client.force_authenticate(user=self.main_user)
+        self.now = timezone.now()
+
+    def _create_event(self, club, user=None):
+        return Event.objects.create(
+            title='Test Event',
+            description='A test event',
+            start=self.now + timedelta(hours=1),
+            end=self.now + timedelta(hours=2),
+            location='Room 1',
+            club=club,
+            created_by=user or self.main_user,
+        )
+
+    # --- Create ---
+
+    def test_main_club_can_create_event_for_main_club(self):
+        """Main-club user can create an event that goes to their main club."""
+        response = self.client.post(reverse('event-list'), {
+            'title': 'Main Club Event',
+            'start': (self.now + timedelta(hours=1)).isoformat(),
+            'end': (self.now + timedelta(hours=2)).isoformat(),
+            'location': 'Main Hall',
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        event = Event.objects.get(pk=response.data['id'])
+        self.assertEqual(event.club, self.main_club)
+
+    def test_main_club_can_create_event_for_sub_club(self):
+        """Main-club user can create an event targeting a direct sub-club via club_id."""
+        response = self.client.post(reverse('event-list'), {
+            'title': 'Sub-club Event',
+            'start': (self.now + timedelta(hours=1)).isoformat(),
+            'end': (self.now + timedelta(hours=2)).isoformat(),
+            'location': 'Sub Lab',
+            'club_id': self.sub_club.id,
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        event = Event.objects.get(pk=response.data['id'])
+        self.assertEqual(event.club, self.sub_club)
+
+    def test_main_club_cannot_create_event_for_unrelated_club(self):
+        """Main-club user cannot create an event for a completely different club."""
+        response = self.client.post(reverse('event-list'), {
+            'title': 'Hack Event',
+            'start': (self.now + timedelta(hours=1)).isoformat(),
+            'end': (self.now + timedelta(hours=2)).isoformat(),
+            'location': 'Hack Hall',
+            'club_id': self.other_club.id,
+        }, format='json')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # --- Update ---
+
+    def test_main_club_can_edit_own_club_event(self):
+        """Main-club user can edit events belonging to their main club."""
+        event = self._create_event(self.main_club)
+        response = self.client.patch(
+            reverse('event-detail', args=[event.id]),
+            {'title': 'Updated Main Event'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_main_club_can_edit_sub_club_event(self):
+        """Main-club user can edit events belonging to their direct sub-club."""
+        event = self._create_event(self.sub_club, user=self.sub_user)
+        response = self.client.patch(
+            reverse('event-detail', args=[event.id]),
+            {'title': 'Updated Sub Event'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        event.refresh_from_db()
+        self.assertEqual(event.title, 'Updated Sub Event')
+
+    def test_main_club_cannot_edit_unrelated_club_event(self):
+        """Main-club user cannot edit events of a completely different club."""
+        event = self._create_event(self.other_club, user=self.other_user)
+        response = self.client.patch(
+            reverse('event-detail', args=[event.id]),
+            {'title': 'Hacked'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # --- Delete ---
+
+    def test_main_club_can_delete_own_club_event(self):
+        """Main-club user can delete events belonging to their main club."""
+        event = self._create_event(self.main_club)
+        response = self.client.delete(reverse('event-detail', args=[event.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    def test_main_club_can_delete_sub_club_event(self):
+        """Main-club user can delete events belonging to their direct sub-club."""
+        event = self._create_event(self.sub_club, user=self.sub_user)
+        response = self.client.delete(reverse('event-detail', args=[event.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertFalse(Event.objects.filter(pk=event.id).exists())
+
+    def test_main_club_cannot_delete_unrelated_club_event(self):
+        """Main-club user cannot delete events of a completely different club."""
+        event = self._create_event(self.other_club, user=self.other_user)
+        response = self.client.delete(reverse('event-detail', args=[event.id]))
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    # --- Sub-club role boundary ---
+
+    def test_sub_club_role_cannot_edit_main_club_event(self):
+        """Sub-club role user cannot edit events of the parent main club."""
+        event = self._create_event(self.main_club)
+        self.client.force_authenticate(user=self.sub_user)
+        response = self.client.patch(
+            reverse('event-detail', args=[event.id]),
+            {'title': 'Overreach Attempt'},
+            format='json',
+        )
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+

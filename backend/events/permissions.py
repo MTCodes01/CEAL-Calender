@@ -5,12 +5,17 @@ class IsClubMemberOrReadOnly(permissions.BasePermission):
     """
     Only club members can create events.
     Read-only access for all authenticated users.
+    Superusers bypass all checks.
     """
     def has_permission(self, request, view):
         # Read permissions for all authenticated users
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated
         
+        # Superusers always allowed
+        if request.user and request.user.is_superuser:
+            return True
+
         # Write permissions only for users with a club
         return request.user and request.user.is_authenticated and request.user.club is not None
 
