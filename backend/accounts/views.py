@@ -1,10 +1,18 @@
 import logging
+from django.conf import settings
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.throttling import ScopedRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 from .models import User
 from .serializers import (
     SignupSerializer, UserSerializer, UserSettingsSerializer,
@@ -27,15 +35,107 @@ class AuthRateThrottle(ScopedRateThrottle):
 class RateLimitedTokenObtainPairView(TokenObtainPairView):
     """
     Login endpoint with stricter rate limiting to prevent brute-force attacks.
+    Returns JWTs in HTTP-only cookies.
     """
+    permission_classes = [permissions.AllowAny]
     throttle_classes = [AuthRateThrottle]
 
+    @method_decorator(ratelimit(key='ip', rate='30/m', block=True), name='dispatch')
     def post(self, request, *args, **kwargs):
         logger.info("Login attempt for email: %s", request.data.get('email', 'unknown'))
         response = super().post(request, *args, **kwargs)
+
         if response.status_code == 200:
+            access_token = response.data.get('access')
+            refresh_token = response.data.get('refresh')
+
+            # Create a new response object to set cookies
+            cookie_response = Response({"message": "Login successful."}, status=status.HTTP_200_OK)
+
+            # Set access token as an HTTP-only cookie
+            cookie_response.set_cookie(
+                key='access_token',
+                value=access_token,
+                httponly=True,
+                secure=settings.SESSION_COOKIE_SECURE, # Use True in production with HTTPS
+                samesite='Lax',
+                max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+            )
+            # Set refresh token as an HTTP-only cookie
+            cookie_response.set_cookie(
+                key='refresh_token',
+                value=refresh_token,
+                httponly=True,
+                secure=settings.SESSION_COOKIE_SECURE, # Use True in production with HTTPS
+                samesite='Lax',
+                max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
+            )
             logger.info("Login successful for email: %s", request.data.get('email'))
-        return response
+            return cookie_response
+        else:
+            logger.warning("Login failed for email: %s with status: %s", request.data.get('email'), response.status_code)
+            return response
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    """
+    Custom TokenRefreshView to get refresh token from cookies and set new tokens in cookies.
+    """
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    @method_decorator(ratelimit(key='ip', rate='30/m', block=True), name='dispatch')
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response({"detail": "Refresh token not found in cookies."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        # Temporarily put the refresh token into request.data for the parent class to process
+        request.data['refresh'] = refresh_token
+
+        try:
+            response = super().post(request, *args, **kwargs)
+
+            if response.status_code == 200:
+                access_token = response.data.get('access')
+                new_refresh_token = response.data.get('refresh') # May or may not be present depending on SIMPLE_JWT settings
+
+                cookie_response = Response({"message": "Token refreshed successfully."}, status=status.HTTP_200_OK)
+
+                cookie_response.set_cookie(
+                    key='access_token',
+                    value=access_token,
+                    httponly=True,
+                    secure=settings.SESSION_COOKIE_SECURE,
+                    samesite='Lax',
+                    max_age=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'].total_seconds()
+                )
+                if new_refresh_token: # If refresh token rotation is enabled
+                    cookie_response.set_cookie(
+                        key='refresh_token',
+                        value=new_refresh_token,
+                        httponly=True,
+                        secure=settings.SESSION_COOKIE_SECURE,
+                        samesite='Lax',
+                        max_age=settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds()
+                    )
+                logger.info("Tokens refreshed for user via cookie.")
+                return cookie_response
+            else:
+                return response
+        except InvalidToken:
+            logger.warning("Invalid refresh token during refresh attempt.")
+            response = Response({"detail": "Invalid refresh token."}, status=status.HTTP_401_UNAUTHORIZED)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
+        except TokenError as e:
+            logger.error("Token error during refresh: %s", str(e))
+            response = Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
 
 
 class SignupView(generics.CreateAPIView):
@@ -48,8 +148,11 @@ class SignupView(generics.CreateAPIView):
     throttle_classes = [AuthRateThrottle]
 
     def perform_create(self, serializer):
+        # Create user and set as active (enabled immediate login)
         user = serializer.save()
-        logger.info("New user registered: %s (id=%s)", user.email, user.id)
+        user.is_active = True 
+        user.save()
+        logger.info("New user registered and activated: %s (id=%s)", user.email, user.id)
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):
@@ -70,57 +173,116 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 class ChangePasswordView(APIView):
     """
-    Change user password.
+    Endpoint for changing password.
     """
     permission_classes = [permissions.IsAuthenticated]
     
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         serializer = ChangePasswordSerializer(data=request.data)
-        
+
         if serializer.is_valid():
             user = request.user
+            if not user.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
             
-            # Check old password
-            if not user.check_password(serializer.data.get('old_password')):
-                return Response(
-                    {"old_password": ["Wrong password."]},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            # Set new password
-            user.set_password(serializer.data.get('new_password'))
+            user.set_password(serializer.data.get("new_password"))
             user.save()
-            logger.info("Password changed for user: %s", user.email)
             
-            return Response(
-                {"message": "Password updated successfully."},
-                status=status.HTTP_200_OK
-            )
-        
+            return Response({"detail": "Password updated successfully."}, status=status.HTTP_200_OK)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetRequestView(APIView):
+    """
+    Request a password reset email.
+    """
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [AuthRateThrottle]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            # Return success to prevent email enumeration
+            return Response({"detail": "If an account with this email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
+            
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        
+        frontend_url = settings.FRONTEND_URL
+        reset_link = f"{frontend_url}/reset-password/{uid}/{token}/"
+        
+        try:
+            send_mail(
+                subject='CEAL-Calendar Password Reset',
+                message=f'Click the following link to reset your password: {reset_link}',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+            logger.info("Password reset email sent to %s", user.email)
+        except Exception as e:
+            logger.error("Failed to send password reset email to %s: %s", user.email, str(e))
+            
+        return Response({"detail": "If an account with this email exists, a password reset link has been sent."}, status=status.HTTP_200_OK)
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    Confirm password reset with token.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, uidb64, token):
+        password = request.data.get('password')
+        if not password:
+            return Response({"error": "New password is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+            
+        if user is not None and default_token_generator.check_token(user, token):
+            user.set_password(password)
+            user.save()
+            logger.info("Password successfully reset for user %s via token", user.email)
+            return Response({"detail": "Password reset successfully."}, status=status.HTTP_200_OK)
+        else:
+            logger.warning("Invalid password reset token used for uidb64: %s", uidb64)
+            return Response({"error": "Invalid or expired reset token."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LogoutView(APIView):
     """
-    Logout endpoint (blacklist refresh token).
+    Logout endpoint (blacklist refresh token and clear cookies).
     """
     permission_classes = [permissions.IsAuthenticated]
     
     def post(self, request):
         try:
-            refresh_token = request.data.get("refresh")
-            if not refresh_token:
-                return Response(
-                    {"error": "Refresh token is required."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            refresh_token = request.COOKIES.get('refresh_token')
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            
+            response = Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
             logger.info("User logged out: %s", request.user.email)
-            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+            return response
         except Exception as e:
             logger.warning("Logout failed for user %s: %s", request.user.email, str(e))
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            response = Response({"error": "Logout failed or token invalid."}, status=status.HTTP_400_BAD_REQUEST)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            return response
 
 
 # ---------------------------------------------------------------------------

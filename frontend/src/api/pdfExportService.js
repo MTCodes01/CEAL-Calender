@@ -113,7 +113,7 @@ const drawMonthGrid = (doc, events, dateRange, options) => {
               doc.setTextColor(...textColor);
               doc.setFontSize(4);
               doc.setFont("helvetica", "bold");
-              doc.text(`${e.id}`, bx + badgeSize / 2, by + badgeSize / 2 + 1.2, { align: 'center' });
+              doc.text(`#${e._displayId}`, bx + badgeSize / 2, by + badgeSize / 2 + 1.2, { align: 'center' });
               doc.setFont("helvetica", "normal");
             }
           });
@@ -238,7 +238,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
       doc.setFontSize(Math.min(6, lWidth * 1.5));
       if (h > 3 && w > 2) {
         doc.setFont("helvetica", "bold");
-        doc.text(`#${e.id}`, x + (w / 2), y + (h / 2) + 0.8, { align: 'center' });
+        doc.text(`#${e._displayId}`, x + (w / 2), y + (h / 2) + 0.8, { align: 'center' });
       }
     });
 
@@ -250,7 +250,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
         doc.rect(dayX + (i * adW) + 0.1, gridTop + 2, adW - 0.1, 6, 'F');
         doc.setTextColor(...getContrastColor(rgb));
         doc.setFontSize(Math.min(5, adW * 1.5));
-        doc.text(`#${e.id}`, dayX + (i * adW) + (adW / 2), gridTop + 6, { align: 'center' });
+        doc.text(`#${e._displayId}`, dayX + (i * adW) + (adW / 2), gridTop + 6, { align: 'center' });
       });
     }
   }
@@ -280,6 +280,11 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
     const s = new Date(e.start);
     const end = new Date(e.end || e.start);
     return s <= new Date(dateRange.end) && end >= new Date(dateRange.start);
+  }).sort((a, b) => new Date(a.start) - new Date(b.start));
+
+  // Assign sequential display IDs for this PDF report
+  filteredEvents.forEach((e, i) => {
+    e._displayId = i + 1;
   });
 
   let lastY;
@@ -290,7 +295,7 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
   }
 
   const tableRows = filteredEvents.map(e => [
-    e.id,
+    `#${e._displayId}`,
     e.title,
     new Date(e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
     new Date(e.end || e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),

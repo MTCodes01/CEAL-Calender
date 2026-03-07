@@ -74,7 +74,8 @@ export default function CalendarPage() {
         params.end = end.toISOString();
       }
       
-      if (selectedClubs.length > 0 && selectedClubs.length < clubs.length) {
+      const allIdsCount = clubs.reduce((acc, c) => acc + 1 + (c.sub_clubs?.length || 0), 0);
+      if (selectedClubs.length > 0 && selectedClubs.length < allIdsCount) {
         params.clubs = selectedClubs.join(',');
       }
 

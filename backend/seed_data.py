@@ -75,14 +75,14 @@ def create_clubs():
         ('edc', 'EDC', 'iedc', 0, None),
         
         # IEEE Sub-clubs
-        ('ieee-cs', 'CS', 'ieee', 0, None),
-        ('ieee-embs', 'EMBS', 'ieee', 1, None),
-        ('ieee-ias', 'IAS', 'ieee', 2, None),
-        ('ieee-pels', 'PELS', 'ieee', 3, None),
-        ('ieee-pes', 'PES', 'ieee', 4, None),
-        ('ieee-ras', 'RAS', 'ieee', 5, None),
-        ('ieee-sps', 'SPS', 'ieee', 6, None),
-        ('ieee-wie', 'WIE', 'ieee', 7, None),
+        ('ieee-cs', 'IEEE CS', 'ieee', 0, None),
+        ('ieee-embs', 'IEEE EMBS', 'ieee', 1, None),
+        ('ieee-ias', 'IEEE IAS', 'ieee', 2, None),
+        ('ieee-pels', 'IEEE PELS', 'ieee', 3, None),
+        ('ieee-pes', 'IEEE PES', 'ieee', 4, None),
+        ('ieee-ras', 'IEEE RAS', 'ieee', 5, None),
+        ('ieee-sps', 'IEEE SPS', 'ieee', 6, None),
+        ('ieee-wie', 'IEEE WIE', 'ieee', 7, None),
     ]
     
     for slug, name, parent_slug, order, color_override in children:

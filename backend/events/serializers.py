@@ -42,7 +42,27 @@ class EventSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "end": "End time must be after start time."
                 })
+        
+        # Validate collaborating clubs
+        collaborating_ids = data.get('collaborating_club_ids')
+        if collaborating_ids is not None:
+            self._validate_collaborating_clubs(collaborating_ids)
+            
         return data
+
+    def _validate_collaborating_clubs(self, club_ids):
+        """
+        Verify that the provided club IDs exist.
+        Collaboration is open to any existing club.
+        """
+        from clubs.models import Club
+        existing_ids = set(Club.objects.filter(pk__in=club_ids).values_list('id', flat=True))
+        
+        for cid in club_ids:
+            if cid not in existing_ids:
+                raise serializers.ValidationError({
+                    "collaborating_club_ids": f"Club with ID {cid} does not exist."
+                })
 
 
 class EventCreateSerializer(serializers.ModelSerializer):
@@ -71,4 +91,24 @@ class EventCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "end": "End time must be after start time."
             })
+            
+        # Validate collaborating clubs
+        collaborating_ids = data.get('collaborating_club_ids')
+        if collaborating_ids is not None:
+            self._validate_collaborating_clubs(collaborating_ids)
+            
         return data
+
+    def _validate_collaborating_clubs(self, club_ids):
+        """
+        Verify that the provided club IDs exist.
+        Collaboration is open to any existing club.
+        """
+        from clubs.models import Club
+        existing_ids = set(Club.objects.filter(pk__in=club_ids).values_list('id', flat=True))
+        
+        for cid in club_ids:
+            if cid not in existing_ids:
+                raise serializers.ValidationError({
+                    "collaborating_club_ids": f"Club with ID {cid} does not exist."
+                })

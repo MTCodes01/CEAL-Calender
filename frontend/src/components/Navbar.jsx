@@ -18,7 +18,7 @@ export default function Navbar() {
 
   const NavLinks = () => (
     <>
-      {user?.is_superuser && (
+      {user?.is_staff && (
         <Link
           to="/admin"
           onClick={() => setIsMobileMenuOpen(false)}

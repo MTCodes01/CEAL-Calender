@@ -127,10 +127,24 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
       onSave();
     } catch (err) {
       const errData = err.response?.data;
-      const errMsg =
-        errData?.error ||
-        (typeof errData?.detail === 'string' ? errData.detail : null) ||
-        'Failed to save event';
+      let errMsg = 'Failed to save event';
+      
+      if (typeof errData === 'string') {
+        errMsg = errData;
+      } else if (errData?.error && typeof errData.error === 'string') {
+        errMsg = errData.error;
+      } else if (errData?.detail) {
+        errMsg = typeof errData.detail === 'string' ? errData.detail : (errData.detail.detail || errMsg);
+      } else if (errData) {
+        // Collect field errors
+        const fields = Object.keys(errData);
+        if (fields.length > 0) {
+          const firstField = fields[0];
+          const fieldError = Array.isArray(errData[firstField]) ? errData[firstField][0] : errData[firstField];
+          errMsg = `${firstField}: ${fieldError}`;
+        }
+      }
+      
       setError(errMsg);
     } finally {
       setLoading(false);

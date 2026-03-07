@@ -58,9 +58,11 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Password
+              </label>
+            </div>
             <input
               type="password"
               required
@@ -70,6 +72,10 @@ export default function Login() {
               placeholder="••••••••"
             />
           </div>
+
+          <Link to="/forgot-password" className="text-sm font-semibold text-primary-600 dark:text-primary-400 hover:underline">
+            Forgot password?
+          </Link>
 
           <button
             type="submit"

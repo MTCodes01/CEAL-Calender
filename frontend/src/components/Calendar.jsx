@@ -64,7 +64,7 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
         // Selection is now persisted until manually cleared
       }}
       eventClick={(info) => {
-        const event = events.find((e) => e.id === parseInt(info.event.id));
+        const event = events.find((e) => e.id === info.event.id);
         if (event) onEventClick(event);
       }}
       dateClick={(info) => {

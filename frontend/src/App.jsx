@@ -1,3 +1,4 @@
+import React, { Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -9,7 +10,11 @@ import Signup from './pages/Signup';
 import CalendarPage from './pages/CalendarPage';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+
+// Lazy load admin dashboard to prevent JS leakage to non-admins
+const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard'));
 
 // Protected route wrapper
 function ProtectedRoute({ children }) {
@@ -52,6 +57,8 @@ function App() {
               <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:uid/:token" element={<ResetPassword />} />
                 <Route
                   path="/calendar"
                   element={
@@ -80,7 +87,13 @@ function App() {
                   path="/admin"
                   element={
                     <AdminRoute>
-                      <AdminDashboard />
+                      <Suspense fallback={
+                        <div className="min-h-screen flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+                        </div>
+                      }>
+                        <AdminDashboard />
+                      </Suspense>
                     </AdminRoute>
                   }
                 />

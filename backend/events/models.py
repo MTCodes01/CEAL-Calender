@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.conf import settings
 from clubs.models import Club
@@ -8,6 +9,7 @@ class Event(models.Model):
     Event model with full datetime support and location
     Supports overlapping events at different locations
     """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     

@@ -46,10 +46,10 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
-            'club', 'sub_club', 'extra_clubs', 'notification_enabled', 'notification_time', 'timezone',
-            'is_staff', 'is_superuser'
+            'club', 'sub_club', 'extra_clubs', 'notification_enabled', 
+            'notification_time', 'timezone', 'is_staff', 'is_superuser'
         ]
-        read_only_fields = ['id', 'email', 'is_staff', 'is_superuser']
+        read_only_fields = ['id', 'email']
 
 
 class AdminUserUpdateSerializer(serializers.ModelSerializer):
