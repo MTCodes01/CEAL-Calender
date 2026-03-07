@@ -264,6 +264,7 @@ export default function CalendarPage() {
   };
 
   const userColor = user?.sub_club?.color || user?.club?.color || '#3779e6';
+  const canCreate = !!(user?.club || user?.sub_club || user?.extra_clubs?.length > 0);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
@@ -355,6 +356,7 @@ export default function CalendarPage() {
                 ref={calendarRef}
                 events={events}
                 userColor={userColor}
+                selectable={canCreate}
                 onEventClick={handleEventClick}
                 onDateSelect={handleDateSelect}
                 onDatesSet={loadEvents}

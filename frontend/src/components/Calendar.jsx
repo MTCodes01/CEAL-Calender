@@ -5,7 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { getContrastColor } from '../utils/colorUtils';
 
-const Calendar = forwardRef(({ events, userColor = '#3779e6', onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
+const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -59,7 +59,7 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', onEventClick, onDa
       }}
       events={calendarEvents}
       dayMaxEvents={4}
-      selectable={true}
+      selectable={selectable}
       selectMirror={true}
       unselectAuto={false}
       selectOverlap={true}
