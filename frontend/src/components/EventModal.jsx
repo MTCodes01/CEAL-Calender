@@ -55,12 +55,26 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
 
   useEffect(() => {
     if (event) {
+      const rawStart = event.start ? new Date(event.start) : new Date();
+      let rawEnd   = event.end   ? new Date(event.end)   : new Date();
+
+      // FullCalendar sends end = midnight of next day for all-day / row clicks.
+      // Detect: end is exactly 00:00:00 AND falls on a different calendar day than start.
+      const endIsMidnight = rawEnd.getHours() === 0 && rawEnd.getMinutes() === 0 && rawEnd.getSeconds() === 0;
+      const endIsNextDay  = rawEnd.getDate()  !== rawStart.getDate()  ||
+                            rawEnd.getMonth() !== rawStart.getMonth() ||
+                            rawEnd.getFullYear() !== rawStart.getFullYear();
+      if (!isEditMode && endIsMidnight && endIsNextDay) {
+        rawEnd = new Date(rawStart);
+        rawEnd.setHours(23, 59, 0, 0);
+      }
+
       setFormData({
-        title: event.title || '',
+        title:       event.title       || '',
         description: event.description || '',
-        start: event.start ? new Date(event.start) : new Date(),
-        end: event.end ? new Date(event.end) : new Date(),
-        location: event.location || '',
+        start:       rawStart,
+        end:         rawEnd,
+        location:    event.location    || '',
       });
       // Pre-fill collab clubs if editing
       if (isEditMode && event.collaborating_clubs) {
