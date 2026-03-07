@@ -18,16 +18,11 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
   const [error, setError] = useState('');
   const isEditMode = !!event?.id;
 
-  // Determine which clubs a main-club user can create events for
-  // (their own main club + its direct sub-clubs)
+  // Determine which clubs a main-club user can create events for.
+  // user.club already carries sub_clubs from the UserSerializer → ClubSerializer.
   const isMainClubRole = !user?.is_superuser && user?.club && !user?.sub_club;
   const creatableClubs = isMainClubRole
-    ? [
-        user.club,
-        ...clubs
-          .flatMap(c => c.sub_clubs || [])
-          .filter(sc => sc.parent === user.club.id || sc.parent?.id === user.club.id),
-      ]
+    ? [user.club, ...(user.club.sub_clubs || [])]
     : [];
 
   const [selectedClubId, setSelectedClubId] = useState(null);
@@ -66,7 +61,11 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
       }
       onSave();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to save event');
+      // The custom exception handler returns { error: string, detail: object }.
+      // Use .error for the human-readable string; fall back to .detail string or generic message.
+      const errData = err.response?.data;
+      const errMsg = errData?.error || (typeof errData?.detail === 'string' ? errData.detail : null) || 'Failed to save event';
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
@@ -80,7 +79,8 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
       await api.delete(`/api/events/${event.id}/`);
       onDelete();
     } catch (err) {
-      setError('Failed to delete event');
+      const errData = err.response?.data;
+      setError(errData?.error || 'Failed to delete event');
     } finally {
       setLoading(false);
     }
@@ -148,6 +148,23 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Club badge — shown in edit mode so the user always knows which club's event this is */}
+              {isEditMode && event?.club && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Club:</span>
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-bold shadow-sm"
+                    style={{
+                      backgroundColor: event.club.color + '20',
+                      color: event.club.color,
+                      border: `1px solid ${event.club.color}50`,
+                    }}
+                  >
+                    {event.club.name}
+                  </span>
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
                 <input

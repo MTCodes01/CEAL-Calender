@@ -83,11 +83,15 @@ export default function CalendarPage() {
       const eventsArray = Array.isArray(data) ? data : (data.results || []);
       
       const processedEvents = (Array.isArray(eventsArray) ? eventsArray : []).map(event => {
-        // Check if user has permission to edit this event
-        const isEditable = user && (
-          user.is_superuser || 
-          (user.club && event.club && user.club.id === event.club.id) ||
-          (user.sub_club && event.club && user.sub_club.id === event.club.id)
+        // Check if user has permission to edit this event (mirrors canEditEvent logic)
+        const eventClub = event.club;
+        const isEditable = user && eventClub && (
+          user.is_superuser ||
+          (user.sub_club && eventClub.id === user.sub_club.id) ||
+          (!user.sub_club && user.club && (
+            eventClub.id === user.club.id ||
+            (eventClub.parent === user.club.id || eventClub.parent?.id === user.club.id)
+          ))
         );
         
         return {
