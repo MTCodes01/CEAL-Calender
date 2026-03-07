@@ -5,7 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { getContrastColor } from '../utils/colorUtils';
 
-const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
+const Calendar = forwardRef(({ events, userColor = '#3779e6', onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -34,8 +34,22 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
 
 
   return (
-    <FullCalendar
-      ref={calendarRef}
+    <>
+      <style>{`
+        .fc-highlight {
+          background-color: ${userColor} !important;
+          opacity: 0.25 !important;
+        }
+        .fc .fc-event-mirror {
+          background-color: ${userColor} !important;
+          border-color: ${userColor} !important;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        }
+      `}</style>
+      <FullCalendar
+        ref={calendarRef}
+        eventBackgroundColor={userColor}
+        eventBorderColor={userColor}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       headerToolbar={{
@@ -133,7 +147,8 @@ const Calendar = forwardRef(({ events, onEventClick, onDateSelect, onDatesSet, o
       expandRows={true}
       stickyHeaderDates={true}
       nowIndicator={true}
-    />
+      />
+    </>
   );
 });
 

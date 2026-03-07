@@ -263,6 +263,8 @@ export default function CalendarPage() {
     return false;
   };
 
+  const userColor = user?.sub_club?.color || user?.club?.color || '#3779e6';
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <Navbar />
@@ -352,6 +354,7 @@ export default function CalendarPage() {
               <Calendar
                 ref={calendarRef}
                 events={events}
+                userColor={userColor}
                 onEventClick={handleEventClick}
                 onDateSelect={handleDateSelect}
                 onDatesSet={loadEvents}
