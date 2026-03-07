@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
 from .models import User
+from clubs.models import Club
 from clubs.serializers import ClubSerializer
 
 
@@ -39,12 +40,13 @@ class UserSerializer(serializers.ModelSerializer):
     """
     club = ClubSerializer(read_only=True)
     sub_club = ClubSerializer(read_only=True)
+    extra_clubs = ClubSerializer(many=True, read_only=True)
     
     class Meta:
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
-            'club', 'sub_club', 'notification_enabled', 'notification_time', 'timezone',
+            'club', 'sub_club', 'extra_clubs', 'notification_enabled', 'notification_time', 'timezone',
             'is_staff', 'is_superuser'
         ]
         read_only_fields = ['id', 'email', 'is_staff', 'is_superuser']
@@ -54,9 +56,22 @@ class AdminUserUpdateSerializer(serializers.ModelSerializer):
     """
     Serializer for admin to update user club assignment
     """
+    extra_clubs = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Club.objects.all(),
+        required=False
+    )
+
     class Meta:
         model = User
-        fields = ['club', 'sub_club']
+        fields = ['club', 'sub_club', 'extra_clubs']
+
+    def update(self, instance, validated_data):
+        extra_clubs = validated_data.pop('extra_clubs', None)
+        instance = super().update(instance, validated_data)
+        if extra_clubs is not None:
+            instance.extra_clubs.set(extra_clubs)
+        return instance
 
 
 class UserSettingsSerializer(serializers.ModelSerializer):

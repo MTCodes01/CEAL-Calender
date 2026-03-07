@@ -18,14 +18,40 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
   const [error, setError] = useState('');
   const isEditMode = !!event?.id;
 
-  // Determine which clubs a main-club user can create events for.
-  // user.club already carries sub_clubs from the UserSerializer → ClubSerializer.
-  const isMainClubRole = !user?.is_superuser && user?.club && !user?.sub_club;
-  const creatableClubs = isMainClubRole
-    ? [user.club, ...(user.club.sub_clubs || [])]
-    : [];
+  // --------------------------------------------------------------------------
+  // Compute all clubs this user can create events for
+  // --------------------------------------------------------------------------
+  const buildAllUserClubs = () => {
+    const seen = new Set();
+    const result = [];
+    const addClub = (c) => {
+      if (c && !seen.has(c.id)) {
+        seen.add(c.id);
+        result.push(c);
+      }
+    };
+    if (user?.sub_club) {
+      addClub(user.sub_club);
+    } else if (user?.club) {
+      addClub(user.club);
+      (user.club.sub_clubs || []).forEach(addClub);
+    }
+    (user?.extra_clubs || []).forEach(addClub);
+    return result;
+  };
+
+  const allUserClubs = buildAllUserClubs();
+  const hasMultipleClubs = allUserClubs.length > 1;
+
+  // Default selected club: sub_club > first available
+  const defaultClubId = () => {
+    if (user?.sub_club) return user.sub_club.id;
+    if (allUserClubs.length > 0) return allUserClubs[0].id;
+    return null;
+  };
 
   const [selectedClubId, setSelectedClubId] = useState(null);
+  const [collaboratingClubIds, setCollaboratingClubIds] = useState([]);
 
   useEffect(() => {
     if (event) {
@@ -36,12 +62,32 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
         end: event.end ? new Date(event.end) : new Date(),
         location: event.location || '',
       });
+      // Pre-fill collab clubs if editing
+      if (isEditMode && event.collaborating_clubs) {
+        setCollaboratingClubIds(event.collaborating_clubs.map(c => c.id));
+      }
     }
-    // Default club selection to user's main club on open
-    if (!isEditMode && isMainClubRole) {
-      setSelectedClubId(user.club.id);
+    // Default club selection on open (new event)
+    if (!isEditMode) {
+      setSelectedClubId(defaultClubId());
+      setCollaboratingClubIds([]);
     }
   }, [event]);
+
+  // Clubs available for collab (everything except the chosen creating club)
+  const allFlatClubs = clubs.reduce((acc, c) => {
+    acc.push(c);
+    if (c.sub_clubs) acc.push(...c.sub_clubs);
+    return acc;
+  }, []);
+
+  const collabOptions = allFlatClubs.filter(c => c.id !== (isEditMode ? event?.club?.id : selectedClubId));
+
+  const toggleCollab = (clubId) => {
+    setCollaboratingClubIds(prev =>
+      prev.includes(clubId) ? prev.filter(id => id !== clubId) : [...prev, clubId]
+    );
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,21 +96,27 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
 
     try {
       if (isEditMode) {
-        await api.put(`/api/events/${event.id}/`, formData);
+        await api.put(`/api/events/${event.id}/`, {
+          ...formData,
+          collaborating_club_ids: collaboratingClubIds,
+        });
       } else {
-        // Include club_id when main-club user picks a target club
-        const payload = { ...formData };
-        if (isMainClubRole && selectedClubId) {
+        const payload = { ...formData, collaborating_club_ids: collaboratingClubIds };
+        // Send club_id if user has multiple club options; otherwise backend auto-assigns
+        if (hasMultipleClubs && selectedClubId) {
+          payload.club_id = selectedClubId;
+        } else if (user?.is_superuser && selectedClubId) {
           payload.club_id = selectedClubId;
         }
         await api.post('/api/events/', payload);
       }
       onSave();
     } catch (err) {
-      // The custom exception handler returns { error: string, detail: object }.
-      // Use .error for the human-readable string; fall back to .detail string or generic message.
       const errData = err.response?.data;
-      const errMsg = errData?.error || (typeof errData?.detail === 'string' ? errData.detail : null) || 'Failed to save event';
+      const errMsg =
+        errData?.error ||
+        (typeof errData?.detail === 'string' ? errData.detail : null) ||
+        'Failed to save event';
       setError(errMsg);
     } finally {
       setLoading(false);
@@ -86,6 +138,21 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
     }
   };
 
+  // Helper to render a club chip badge
+  const ClubBadge = ({ club, small = false }) => (
+    <span
+      className={`${small ? 'px-2 py-0.5 text-xs' : 'px-3 py-1 text-xs'} inline-flex items-center gap-1.5 rounded-full font-bold`}
+      style={{
+        backgroundColor: club.color + '20',
+        color: club.color,
+        border: `1px solid ${club.color}50`,
+      }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: club.color }} />
+      {club.name}
+    </span>
+  );
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transition-colors duration-200">
@@ -94,10 +161,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? (canEdit ? 'Edit Event' : 'Event Details') : 'Create Event'}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">
               &times;
             </button>
           </div>
@@ -109,6 +173,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
           )}
 
           {isEditMode && !canEdit ? (
+            /* ── READ-ONLY VIEW ─────────────────────────────────────────── */
             <div className="space-y-4">
               <div>
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{event.title}</h3>
@@ -131,8 +196,16 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                   {event.club.name}
                 </div>
               </div>
+              {event.collaborating_clubs && event.collaborating_clubs.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🤝 Collaborating Clubs</label>
+                  <div className="flex flex-wrap gap-2">
+                    {event.collaborating_clubs.map(c => <ClubBadge key={c.id} club={c} />)}
+                  </div>
+                </div>
+              )}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date & Time</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date &amp; Time</label>
                 <p className="text-gray-900 dark:text-gray-100">{new Date(event.start).toLocaleString()} - {new Date(event.end).toLocaleString()}</p>
               </div>
               <div>
@@ -147,41 +220,30 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
               )}
             </div>
           ) : (
+            /* ── EDIT / CREATE FORM ─────────────────────────────────────── */
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Club badge — shown in edit mode so the user always knows which club's event this is */}
+              {/* Club badge in edit mode */}
               {isEditMode && event?.club && (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Club:</span>
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-bold shadow-sm"
-                    style={{
-                      backgroundColor: event.club.color + '20',
-                      color: event.club.color,
-                      border: `1px solid ${event.club.color}50`,
-                    }}
-                  >
-                    {event.club.name}
-                  </span>
+                  <ClubBadge club={event.club} />
+                  {event.collaborating_clubs && event.collaborating_clubs.length > 0 && (
+                    <>
+                      <span className="text-xs text-gray-400">🤝</span>
+                      {event.collaborating_clubs.map(c => <ClubBadge key={c.id} club={c} small />)}
+                    </>
+                  )}
                 </div>
               )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                />
-              </div>
-
-              {/* Club selector — only shown to main-club role when creating a new event */}
-              {!isEditMode && isMainClubRole && creatableClubs.length > 1 && (
+              {/* Club selector — shown when creating and user has multiple options */}
+              {!isEditMode && hasMultipleClubs && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Club *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Creating for Club *
+                  </label>
                   <div className="flex flex-wrap gap-2">
-                    {creatableClubs.map(c => (
+                    {allUserClubs.map(c => (
                       <button
                         key={c.id}
                         type="button"
@@ -201,6 +263,17 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
               )}
 
               <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title *</label>
+                <input
+                  type="text"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                />
+              </div>
+
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location *</label>
                 <input
                   type="text"
@@ -214,7 +287,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date & Time *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Date &amp; Time *</label>
                   <DatePicker
                     selected={formData.start}
                     onChange={(date) => setFormData({ ...formData, start: date })}
@@ -224,7 +297,7 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date & Time *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Date &amp; Time *</label>
                   <DatePicker
                     selected={formData.end}
                     onChange={(date) => setFormData({ ...formData, end: date })}
@@ -239,11 +312,51 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
                 <textarea
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  rows="4"
+                  rows="3"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
+
+              {/* Collaborating Clubs */}
+              {collabOptions.length > 0 && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    🤝 Collaborating Clubs
+                    <span className="ml-1.5 text-xs font-normal text-gray-400">(optional)</span>
+                  </label>
+                  <div className="max-h-36 overflow-y-auto space-y-1 border border-gray-200 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/30">
+                    {collabOptions.map(c => {
+                      const checked = collaboratingClubIds.includes(c.id);
+                      return (
+                        <label
+                          key={c.id}
+                          className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
+                            checked ? 'bg-white dark:bg-gray-700 shadow-sm' : 'hover:bg-white dark:hover:bg-gray-700/50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleCollab(c.id)}
+                            className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                          />
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: c.color }} />
+                          <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">{c.name}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  {collaboratingClubIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-2">
+                      {collaboratingClubIds.map(id => {
+                        const c = allFlatClubs.find(cl => cl.id === id);
+                        return c ? <ClubBadge key={id} club={c} small /> : null;
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button

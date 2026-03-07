@@ -85,13 +85,15 @@ export default function CalendarPage() {
       const processedEvents = (Array.isArray(eventsArray) ? eventsArray : []).map(event => {
         // Check if user has permission to edit this event (mirrors canEditEvent logic)
         const eventClub = event.club;
+        const extraClubIds = user?.extra_clubs?.map(c => c.id) || [];
         const isEditable = user && eventClub && (
           user.is_superuser ||
           (user.sub_club && eventClub.id === user.sub_club.id) ||
           (!user.sub_club && user.club && (
             eventClub.id === user.club.id ||
             (eventClub.parent === user.club.id || eventClub.parent?.id === user.club.id)
-          ))
+          )) ||
+          extraClubIds.includes(eventClub.id)
         );
         
         return {
@@ -117,7 +119,8 @@ export default function CalendarPage() {
   };
 
   const handleDateSelect = (start, end) => {
-    if (user?.club || user?.sub_club) {
+    const hasClubRole = user?.club || user?.sub_club || (user?.extra_clubs?.length > 0);
+    if (hasClubRole) {
       setSelectedEvent({ start, end });
       setShowEventModal(true);
     }
@@ -238,6 +241,10 @@ export default function CalendarPage() {
     
     if (!eventClub) return false;
     
+    // Extra clubs check
+    const extraClubIds = user.extra_clubs?.map(c => c.id) || [];
+    if (extraClubIds.includes(eventClub.id)) return true;
+
     // Sub-club role: can ONLY edit their specific sub-club's events
     if (user.sub_club) {
       return eventClub.id === user.sub_club.id;
@@ -323,7 +330,7 @@ export default function CalendarPage() {
                   Export PDF
                 </button>
 
-                {(user?.club || user?.sub_club) && (
+                {(user?.club || user?.sub_club || user?.extra_clubs?.length > 0) && (
                   <button
                     onClick={() => {
                       setSelectedEvent({ start: new Date(), end: new Date() });

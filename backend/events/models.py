@@ -21,6 +21,12 @@ class Event(models.Model):
     # Relations
     club = models.ForeignKey(Club, on_delete=models.CASCADE, related_name='events')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_events')
+    collaborating_clubs = models.ManyToManyField(
+        Club,
+        blank=True,
+        related_name='collaborated_events',
+        help_text='Other clubs co-organizing this event'
+    )
     
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)

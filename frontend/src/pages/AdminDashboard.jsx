@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const [editingUser, setEditingUser] = useState(null);
   const [selectedClub, setSelectedClub] = useState('');
   const [selectedSubClub, setSelectedSubClub] = useState('');
+  const [selectedExtraClubs, setSelectedExtraClubs] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -35,20 +36,22 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleEditClick = (user) => {
-    setEditingUser(user);
-    setSelectedClub(user.club ? user.club.id : '');
-    setSelectedSubClub(user.sub_club ? user.sub_club.id : '');
+  const handleEditClick = (u) => {
+    setEditingUser(u);
+    setSelectedClub(u.club ? u.club.id : '');
+    setSelectedSubClub(u.sub_club ? u.sub_club.id : '');
+    setSelectedExtraClubs(u.extra_clubs ? u.extra_clubs.map(c => c.id) : []);
   };
 
   const handleSave = async () => {
     try {
       await api.patch(`/api/auth/users/${editingUser.id}/`, {
         club: selectedClub || null,
-        sub_club: selectedSubClub || null
+        sub_club: selectedSubClub || null,
+        extra_clubs: selectedExtraClubs,
       });
       setEditingUser(null);
-      fetchData(); // Refresh list
+      fetchData();
     } catch (err) {
       console.error('Failed to update user', err);
       alert('Failed to update user');
@@ -59,12 +62,20 @@ const AdminDashboard = () => {
     if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
       try {
         await api.delete(`/api/auth/users/${userId}/`);
-        fetchData(); // Refresh list
+        fetchData();
       } catch (err) {
         console.error('Failed to delete user', err);
         alert('Failed to delete user');
       }
     }
+  };
+
+  const toggleExtraClub = (clubId) => {
+    setSelectedExtraClubs(prev =>
+      prev.includes(clubId)
+        ? prev.filter(id => id !== clubId)
+        : [...prev, clubId]
+    );
   };
 
   // Filter sub-clubs based on selected parent club using the nested structure
@@ -73,6 +84,20 @@ const AdminDashboard = () => {
   
   // Main clubs are those returned at the top level (they have no parent in the new API)
   const mainClubOptions = clubs;
+
+  // All clubs that can serve as "extra" clubs (all clubs flattened)
+  const allFlatClubs = clubs.reduce((acc, c) => {
+    acc.push(c);
+    if (c.sub_clubs) acc.push(...c.sub_clubs);
+    return acc;
+  }, []);
+
+  const primaryClubIds = new Set([
+    selectedClub ? parseInt(selectedClub) : null,
+    selectedSubClub ? parseInt(selectedSubClub) : null,
+  ].filter(Boolean));
+
+  const extraClubOptions = allFlatClubs.filter(c => !primaryClubIds.has(c.id));
 
   if (loading) return <div className="p-8 text-center">Loading...</div>;
   if (error) return <div className="p-8 text-center text-red-500">{error}</div>;
@@ -110,6 +135,7 @@ const AdminDashboard = () => {
                   <th className="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">Email Address</th>
                   <th className="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">Main Club</th>
                   <th className="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">Sub Club</th>
+                  <th className="px-4 sm:px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">Additional Clubs</th>
                   <th className="px-4 sm:px-6 py-4 text-right text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
@@ -141,6 +167,21 @@ const AdminDashboard = () => {
                         </span>
                       ) : <span className="text-gray-300 dark:text-gray-600">—</span>}
                     </td>
+                    <td className="px-4 sm:px-6 py-4 text-sm">
+                      {u.extra_clubs && u.extra_clubs.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {u.extra_clubs.map(ec => (
+                            <span
+                              key={ec.id}
+                              className="px-2 py-0.5 inline-flex text-xs leading-none font-bold rounded-full border"
+                              style={{ borderColor: ec.color + '40', color: ec.color, backgroundColor: ec.color + '15' }}
+                            >
+                              {ec.name}
+                            </span>
+                          ))}
+                        </div>
+                      ) : <span className="text-gray-300 dark:text-gray-600">—</span>}
+                    </td>
                     <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-right text-sm font-bold space-x-3">
                       <button onClick={() => handleEditClick(u)} className="text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors">Edit</button>
                       <button onClick={() => handleDelete(u.id)} className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors">Delete</button>
@@ -162,21 +203,29 @@ const AdminDashboard = () => {
               <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
             </div>
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
-              <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <h3 className="text-lg leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
-                  Assign Roles: {editingUser.email}
-                </h3>
-                <div className="mt-4 space-y-4">
+            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border border-gray-200 dark:border-gray-700">
+              <div className="bg-white dark:bg-gray-800 px-6 pt-6 pb-4">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">
+                    Assign Roles
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 truncate ml-2">{editingUser.email}</p>
+                </div>
+                <div className="space-y-5">
+                  {/* Main Club */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Main Club Responsibility</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Main Club</label>
                     <select
                       value={selectedClub}
                       onChange={(e) => {
                         setSelectedClub(e.target.value);
-                        setSelectedSubClub(''); // Reset sub-club when main club changes
+                        setSelectedSubClub('');
+                        // Remove from extra_clubs if now a primary club
+                        if (e.target.value) {
+                          setSelectedExtraClubs(prev => prev.filter(id => id !== parseInt(e.target.value)));
+                        }
                       }}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg dark:bg-gray-700 dark:text-white"
                     >
                       <option value="">None (Viewer Only)</option>
                       {mainClubOptions.map(c => (
@@ -184,35 +233,89 @@ const AdminDashboard = () => {
                       ))}
                     </select>
                   </div>
+
+                  {/* Sub Club */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sub Club Responsibility</label>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Sub Club</label>
                     <select
                       value={selectedSubClub}
-                      onChange={(e) => setSelectedSubClub(e.target.value)}
+                      onChange={(e) => {
+                        setSelectedSubClub(e.target.value);
+                        if (e.target.value) {
+                          setSelectedExtraClubs(prev => prev.filter(id => id !== parseInt(e.target.value)));
+                        }
+                      }}
                       disabled={!selectedClub}
-                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-md dark:bg-gray-700 dark:text-white disabled:opacity-50"
+                      className="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm rounded-lg dark:bg-gray-700 dark:text-white disabled:opacity-50"
                     >
                       <option value="">None</option>
                       {subClubOptions.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                       ))}
                     </select>
-                    {!selectedClub && <p className="text-xs text-gray-500 mt-2">Assign a main club first to see sub-club options.</p>}
+                    {!selectedClub && <p className="text-xs text-gray-500 mt-1.5">Assign a main club first to see sub-club options.</p>}
+                  </div>
+
+                  {/* Additional Clubs */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Additional Clubs
+                      <span className="ml-1.5 text-xs font-normal text-gray-400">(optional — multi-select)</span>
+                    </label>
+                    {extraClubOptions.length === 0 ? (
+                      <p className="text-xs text-gray-400 italic">No other clubs available.</p>
+                    ) : (
+                      <div className="max-h-40 overflow-y-auto space-y-1.5 border border-gray-200 dark:border-gray-600 rounded-lg p-2 bg-gray-50 dark:bg-gray-900/30">
+                        {extraClubOptions.map(c => {
+                          const checked = selectedExtraClubs.includes(c.id);
+                          return (
+                            <label
+                              key={c.id}
+                              className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg cursor-pointer transition-all ${
+                                checked
+                                  ? 'bg-white dark:bg-gray-700 shadow-sm'
+                                  : 'hover:bg-white dark:hover:bg-gray-700/50'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={() => toggleExtraClub(c.id)}
+                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                              />
+                              <span
+                                className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+                                style={{ backgroundColor: c.color }}
+                              />
+                              <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">{c.name}</span>
+                              {c.parent && (
+                                <span className="text-xs text-gray-400 ml-auto">sub-club</span>
+                              )}
+                            </label>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {selectedExtraClubs.length > 0 && (
+                      <p className="text-xs text-primary-600 dark:text-primary-400 mt-1.5 font-medium">
+                        {selectedExtraClubs.length} additional club{selectedExtraClubs.length > 1 ? 's' : ''} selected
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse space-y-2 sm:space-y-0">
+              <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 flex flex-row-reverse gap-3">
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="inline-flex justify-center rounded-xl border border-transparent shadow-sm px-5 py-2 bg-primary-600 text-sm font-semibold text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
                 >
                   Save Changes
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditingUser(null)}
-                  className="w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:w-auto sm:text-sm"
+                  className="inline-flex justify-center rounded-xl border border-gray-300 dark:border-gray-600 shadow-sm px-5 py-2 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
                 >
                   Cancel
                 </button>

@@ -22,6 +22,12 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         related_name='sub_club_members'
     )
+    extra_clubs = models.ManyToManyField(
+        Club,
+        blank=True,
+        related_name='extra_members',
+        help_text='Additional clubs this user can create/manage events for'
+    )
     
     # Notification settings
     notification_enabled = models.BooleanField(default=True)

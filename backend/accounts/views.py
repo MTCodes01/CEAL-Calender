@@ -130,7 +130,7 @@ class UserListView(generics.ListAPIView):
     """
     Admin endpoint to list all users.
     """
-    queryset = User.objects.select_related('club', 'sub_club').all()
+    queryset = User.objects.select_related('club', 'sub_club').prefetch_related('extra_clubs').all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
 
@@ -139,7 +139,7 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     Admin endpoint to retrieve, update, or delete a single user.
     """
-    queryset = User.objects.select_related('club', 'sub_club').all()
+    queryset = User.objects.select_related('club', 'sub_club').prefetch_related('extra_clubs').all()
     permission_classes = [permissions.IsAdminUser]
 
     def get_serializer_class(self):
