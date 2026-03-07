@@ -295,18 +295,22 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
     new Date(e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
     new Date(e.end || e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
     e.club?.parent_name || e.club?.name || 'N/A',
-    e.club?.parent_name ? (e.club?.name || '-') : '-'
+    e.club?.parent_name ? (e.club?.name || '-') : '-',
+    (e.collaborating_clubs && e.collaborating_clubs.length > 0)
+      ? e.collaborating_clubs.map(c => c.name).join(', ')
+      : '-'
   ]);
 
   doc.autoTable({
     startY: lastY + 15,
-    head: [['ID', 'Event Title', 'Start', 'End', 'Main Club', 'Sub Club']],
+    head: [['ID', 'Event Title', 'Start', 'End', 'Main Club', 'Sub Club', 'Collaborating Clubs']],
     body: tableRows,
     theme: 'grid',
     headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
     bodyStyles: { fillColor: [15, 23, 42], textColor: [203, 213, 225], fontSize: 7 },
     alternateRowStyles: { fillColor: [17, 24, 39] },
     styles: { lineColor: [51, 65, 85] },
+    columnStyles: { 6: { cellWidth: 40 } },
     margin: { left: 12, right: 12 }
   });
 
