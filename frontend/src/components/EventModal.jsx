@@ -65,8 +65,9 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                             rawEnd.getMonth() !== rawStart.getMonth() ||
                             rawEnd.getFullYear() !== rawStart.getFullYear();
       if (!isEditMode && endIsMidnight && endIsNextDay) {
-        rawEnd = new Date(rawStart);
-        rawEnd.setHours(23, 59, 0, 0);
+        // FullCalendar selection end is exclusive (midnight of the day *after* selection).
+        // Subtract 1 minute to make it 23:59 on the actual last selected day.
+        rawEnd = new Date(rawEnd.getTime() - 60000); 
       }
 
       setFormData({
