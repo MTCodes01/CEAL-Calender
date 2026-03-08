@@ -109,7 +109,7 @@ export default function Profile() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Clubs</label>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {user?.club ? (
                   <div
                     className="px-4 py-3 rounded-lg inline-flex items-center gap-2 font-semibold shadow-md text-sm"
