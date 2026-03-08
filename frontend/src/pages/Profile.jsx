@@ -138,6 +138,20 @@ export default function Profile() {
                     {user.sub_club.name}
                   </div>
                 )}
+                {user?.extra_clubs?.map((club) => (
+                  <div
+                    key={`extra-${club.id}`}
+                    className="px-4 py-3 rounded-lg inline-flex items-center gap-2 font-semibold shadow-md text-sm"
+                    style={{
+                      backgroundColor: club.color,
+                      color: getContrastColor(club.color),
+                      boxShadow: `0 2px 8px ${club.color}55`,
+                    }}
+                  >
+                    <span className="w-2 h-2 rounded-full opacity-70" style={{ backgroundColor: getContrastColor(club.color) }} />
+                    {club.name}
+                  </div>
+                ))}
               </div>
             </div>
 
