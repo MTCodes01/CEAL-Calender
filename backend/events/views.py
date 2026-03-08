@@ -168,9 +168,9 @@ class EventViewSet(viewsets.ModelViewSet):
             elif user.sub_club:
                 # Sub-club role: only their exact sub-club
                 if user.sub_club.id != event.club.id:
-                    raise PermissionDenied("You can only edit events for your own sub-club.")
+                    raise PermissionDenied("You can only edit events for your assigned clubs.")
             elif user.club:
-                # Main-club role: own club OR any direct sub-club OR extra clubs
+                # Main-club role: own club OR any direct sub-club
                 is_own_club = event.club.id == user.club.id
                 is_sub_club = event.club.parent_id == user.club.id
                 if not (is_own_club or is_sub_club):
@@ -198,20 +198,20 @@ class EventViewSet(viewsets.ModelViewSet):
         user = self.request.user
         if not user.is_superuser:
             extra_club_ids = list(user.extra_clubs.values_list('id', flat=True))
-            if user.sub_club:
+            
+            # Allow delete if the event's club is in the user's extra_clubs
+            if instance.club.id in extra_club_ids:
+                pass # permitted
+            elif user.sub_club:
                 # Sub-club role: strict — only their exact sub-club
                 if user.sub_club.id != instance.club.id:
-                    raise PermissionDenied("You can only delete events for your own sub-club.")
+                    raise PermissionDenied("You can only delete events for your assigned clubs.")
             elif user.club:
-                # Main-club role: own club OR any direct sub-club OR extra clubs
+                # Main-club role: own club OR any direct sub-club
                 is_own_club = instance.club.id == user.club.id
                 is_sub_club = instance.club.parent_id == user.club.id
-                is_extra_club = instance.club.id in extra_club_ids
-                if not (is_own_club or is_sub_club or is_extra_club):
+                if not (is_own_club or is_sub_club):
                     raise PermissionDenied("You can only delete events for your club and its sub-clubs.")
-            elif extra_club_ids:
-                if instance.club.id not in extra_club_ids:
-                    raise PermissionDenied("You can only delete events for your assigned clubs.")
             else:
                 raise PermissionDenied("You must be a member of a club to delete events.")
         logger.info("Event deleted: '%s' (id=%s) by %s", instance.title, instance.id, user.email)
