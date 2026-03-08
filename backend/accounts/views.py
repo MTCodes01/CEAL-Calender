@@ -170,6 +170,20 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             return UserSettingsSerializer
         return UserSerializer
 
+    def update(self, request, *args, **kwargs):
+        # Allow partial updates (PATCH)
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        # Use UserSettingsSerializer for validation and data saving
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        # Return the FULL user profile regardless of which serializer was used for input
+        full_serializer = UserSerializer(instance, context=self.get_serializer_context())
+        return Response(full_serializer.data)
+
 
 class ChangePasswordView(APIView):
     """
