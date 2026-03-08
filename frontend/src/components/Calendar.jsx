@@ -78,7 +78,9 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true,
         // Selection is now persisted until manually cleared
       }}
       eventClick={(info) => {
-        const event = events.find((e) => e.id === info.event.id);
+        // Use loose equality (==) because FullCalendar IDs are strings, 
+        // but local state IDs might be numbers
+        const event = events.find((e) => e.id == info.event.id);
         if (event) onEventClick(event);
       }}
       dateClick={(info) => {

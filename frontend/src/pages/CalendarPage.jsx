@@ -173,19 +173,33 @@ export default function CalendarPage() {
       }
     }
 
+    // Optimistically update local state immediately
+    const optimisticStart = start.toISOString();
+    const optimisticEnd = end ? end.toISOString() : null;
+    
+    setEvents(prev => prev.map(e => 
+      e.id == event.id // Use loose equality
+        ? { ...e, start: optimisticStart, end: optimisticEnd } 
+        : e
+    ));
+
     try {
-      await api.patch(`/api/events/${event.id}/`, {
-        start: start.toISOString(),
-        end: end ? end.toISOString() : null,
+      const response = await api.patch(`/api/events/${event.id}/`, {
+        start: optimisticStart,
+        end: optimisticEnd,
       });
       
-      // Reload events to reflect the correct time in the UI if we modified it
-      if (view.type === 'dayGridMonth') {
-        loadEvents();
-      }
+      const updatedFromServer = response.data;
+      // Update with the final truth from server (but keep editable flag)
+      setEvents(prev => prev.map(e => 
+        e.id == updatedFromServer.id 
+          ? { ...updatedFromServer, editable: true, startEditable: true, durationEditable: true, resourceEditable: true } 
+          : e
+      ));
     } catch (error) {
       console.error('Failed to update event:', error);
       revert();
+      loadEvents(); // Restore state from server on failure
     }
   };
 
@@ -198,14 +212,35 @@ export default function CalendarPage() {
       return;
     }
 
+    const start = event.start;
+    const end = event.end;
+    const isoStart = start.toISOString();
+    const isoEnd = end ? end.toISOString() : null;
+
+    // Optimistically update local state
+    setEvents(prev => prev.map(e => 
+      e.id == event.id // Use loose equality
+        ? { ...e, start: isoStart, end: isoEnd } 
+        : e
+    ));
+
     try {
-      await api.patch(`/api/events/${event.id}/`, {
-        start: event.start.toISOString(),
-        end: event.end.toISOString(),
+      const response = await api.patch(`/api/events/${event.id}/`, {
+        start: isoStart,
+        end: isoEnd,
       });
+      
+      const updatedFromServer = response.data;
+      // Update with the final truth from server
+      setEvents(prev => prev.map(e => 
+        e.id == updatedFromServer.id 
+          ? { ...updatedFromServer, editable: true, startEditable: true, durationEditable: true, resourceEditable: true } 
+          : e
+      ));
     } catch (error) {
       console.error('Failed to update event:', error);
       revert();
+      loadEvents(); // Restore state from server on failure
     }
   };
 
