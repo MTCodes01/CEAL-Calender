@@ -41,15 +41,11 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true,
           opacity: 0.25 !important;
         }
         .fc .fc-event-mirror {
-          background-color: ${userColor} !important;
-          border-color: ${userColor} !important;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
         }
       `}</style>
       <FullCalendar
         ref={calendarRef}
-        eventBackgroundColor={userColor}
-        eventBorderColor={userColor}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
       initialView="dayGridMonth"
       headerToolbar={{
