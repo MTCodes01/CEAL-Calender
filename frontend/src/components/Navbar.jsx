@@ -18,6 +18,13 @@ export default function Navbar() {
 
   const NavLinks = () => (
     <>
+      <Link
+        to="/calendar"
+        onClick={() => setIsMobileMenuOpen(false)}
+        className="px-3 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-200"
+      >
+        Calendar
+      </Link>
       {user?.is_staff && (
         <Link
           to="/admin"
