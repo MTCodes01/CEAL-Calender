@@ -68,7 +68,7 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true,
         if (onEventResize) onEventResize(info);
       }}
       select={(info) => {
-        if (onDateSelect && (info.view.type === 'timeGridWeek' || info.view.type === 'timeGridDay')) {
+        if (onDateSelect) {
           onDateSelect(info.start, info.end);
         }
         // Selection is now persisted until manually cleared
