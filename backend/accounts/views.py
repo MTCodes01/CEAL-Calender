@@ -220,7 +220,7 @@ class PasswordResetRequestView(APIView):
         try:
             send_mail(
                 subject='CEAL-Calendar Password Reset',
-                message=f'Click the following link to reset your password: {reset_link}',
+                message=f'Click the following link to reset your password: {reset_link}\n\nThis link will expire in 15 minutes.',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[user.email],
                 fail_silently=False,

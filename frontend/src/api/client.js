@@ -29,7 +29,11 @@ api.interceptors.response.use(
     const refreshUrl = '/api/auth/token/refresh/';
     if (error.response?.status === 401 && originalRequest.url === refreshUrl) {
       // Refresh failed, meaning refresh token is expired or invalid
-      if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+      const publicPaths = ['/login', '/signup', '/forgot-password'];
+      const isPublicPath = publicPaths.includes(window.location.pathname) || 
+                          window.location.pathname.startsWith('/reset-password/');
+      
+      if (!isPublicPath) {
         window.location.href = '/login';
       }
       return Promise.reject(error);
@@ -53,7 +57,12 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh failed — clear local state and redirect to login
-        if (window.location.pathname !== '/login' && window.location.pathname !== '/signup') {
+        // EXCLUSION: Don't redirect if we are on login, signup, or password reset pages
+        const publicPaths = ['/login', '/signup', '/forgot-password'];
+        const isPublicPath = publicPaths.includes(window.location.pathname) || 
+                            window.location.pathname.startsWith('/reset-password/');
+        
+        if (!isPublicPath) {
           window.location.href = '/login';
         }
         return Promise.reject(refreshError);

@@ -107,6 +107,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Password reset link timeout (in seconds)
+PASSWORD_RESET_TIMEOUT = 900  # 15 minutes
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
