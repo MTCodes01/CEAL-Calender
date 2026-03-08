@@ -7,9 +7,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB=${POSTGRES_DB:-ceal_calendar}
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5433:5432"
     restart: unless-stopped
@@ -130,11 +130,7 @@ services:
       - "3100:3100"
     restart: unless-stopped
     environment:
-      - VITE_API_URL=http://localhost:8100
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    command: npm run dev -- --host
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8100}
 
 volumes:
   postgres_data:

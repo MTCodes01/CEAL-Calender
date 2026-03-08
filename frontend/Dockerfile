@@ -1,20 +1,21 @@
-# Use Node image for development
-FROM node:18-alpine
+# Stage 1: Build the React Application
+FROM node:18-alpine as builder
 
-# Set working directory
 WORKDIR /app
-
-# Copy package files
-COPY package.json ./
-
-# Install dependencies
+COPY package.json package-lock.json* ./
 RUN npm install
 
-# Copy project files
 COPY . .
+RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Stage 2: Serve with Nginx
+FROM nginx:alpine
 
-# Start dev server
-CMD ["npm", "run", "dev", "--", "--host"]
+# Copy the custom nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy the built assets from the builder stage
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 3100
+CMD ["nginx", "-g", "daemon off;"]

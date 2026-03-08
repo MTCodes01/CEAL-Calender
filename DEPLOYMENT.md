@@ -49,10 +49,10 @@ SECRET_KEY=your-super-secret-production-key-change-this
 DEBUG=False
 ALLOWED_HOSTS=localhost,127.0.0.1,domain.com,ceal.domain.com
 
-# Database
+# Database (These MUST be set, no defaults anymore!)
 POSTGRES_DB=ceal_calendar
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your-strong-password-here
+POSTGRES_USER=my_secure_db_user
+POSTGRES_PASSWORD=my_extremely_strong_db_password
 
 # CORS
 CORS_ALLOWED_ORIGINS=https://domain.com,https://ceal.domain.com
