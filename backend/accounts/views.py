@@ -326,3 +326,13 @@ class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
     def perform_destroy(self, instance):
         logger.warning("Admin %s deleted user %s (id=%s)", self.request.user.email, instance.email, instance.id)
         instance.delete()
+
+
+class VersionView(APIView):
+    """
+    Get the current backend version.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        return Response({"version": settings.APP_VERSION})

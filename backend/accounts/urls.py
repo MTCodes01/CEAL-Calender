@@ -3,7 +3,8 @@ from django.urls import path
 from .views import (
     RateLimitedTokenObtainPairView, SignupView, UserProfileView,
     ChangePasswordView, LogoutView, UserListView, UserDetailView,
-    CookieTokenRefreshView, PasswordResetRequestView, PasswordResetConfirmView
+    CookieTokenRefreshView, PasswordResetRequestView, PasswordResetConfirmView,
+    VersionView
 )
 
 urlpatterns = [
@@ -24,4 +25,5 @@ urlpatterns = [
     # Admin endpoints (split into list + detail)
     path('users/', UserListView.as_view(), name='user-list'),
     path('users/<int:pk>/', UserDetailView.as_view(), name='user-detail'),
+    path('version/', VersionView.as_view(), name='version'),
 ]

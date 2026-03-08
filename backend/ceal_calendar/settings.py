@@ -110,6 +110,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Password reset link timeout (in seconds)
 PASSWORD_RESET_TIMEOUT = 900  # 15 minutes
 
+# Application Version
+APP_VERSION = "1.0.0"
+
 # Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
