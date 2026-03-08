@@ -1,6 +1,18 @@
+import random
+from datetime import time
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from clubs.models import Club
+
+
+def get_random_notification_time():
+    """
+    Returns a random time between 07:00 and 10:00.
+    This helps distribute the email load across a 3-hour window.
+    """
+    hour = random.randint(7, 9)
+    minute = random.randint(0, 59)
+    return time(hour, minute)
 
 
 class User(AbstractUser):
@@ -32,6 +44,7 @@ class User(AbstractUser):
     # Notification settings
     notification_enabled = models.BooleanField(default=True)
     notification_time = models.TimeField(
+        default=get_random_notification_time,
         null=True,
         blank=True,
         help_text="Time to send daily notification (in user's timezone)"
