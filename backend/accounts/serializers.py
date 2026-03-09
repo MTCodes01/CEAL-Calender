@@ -47,7 +47,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
             'club', 'sub_club', 'extra_clubs', 'notification_enabled', 
-            'notification_time', 'timezone', 'is_staff', 'is_superuser'
+            'notification_time', 'timezone', 'time_format', 'is_staff', 'is_superuser'
         ]
         read_only_fields = ['id', 'email']
 
@@ -82,7 +82,7 @@ class UserSettingsSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'first_name', 'last_name', 'notification_enabled',
-            'notification_time', 'timezone'
+            'notification_time', 'timezone', 'time_format'
         ]
 
 

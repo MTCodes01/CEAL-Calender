@@ -60,6 +60,18 @@ class User(AbstractUser):
         help_text="UTC timestamp of last notification sent"
     )
     
+    # Time format preference
+    TIME_FORMAT_CHOICES = [
+        ('12h', '12 Hour'),
+        ('24h', '24 Hour'),
+    ]
+    time_format = models.CharField(
+        max_length=3,
+        choices=TIME_FORMAT_CHOICES,
+        default='12h',
+        help_text="User's preferred time format"
+    )
+    
     # Use email as username field for authentication
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
