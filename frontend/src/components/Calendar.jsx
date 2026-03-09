@@ -32,6 +32,7 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
     },
   }));
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <>
@@ -55,12 +56,12 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       }}
       events={calendarEvents}
       dayMaxEvents={4}
-      selectable={selectable}
-      selectMirror={true}
+      selectable={isMobile ? false : selectable}
+      selectMirror={!isMobile}
       unselectAuto={false}
       selectOverlap={true}
       slotEventOverlap={false}
-      editable={true}
+      editable={isMobile ? false : true}
       slotLabelFormat={{
         hour: 'numeric',
         minute: '2-digit',
@@ -153,7 +154,7 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       slotMaxTime="24:00:00"
       slotDuration="00:30:00"
       snapDuration="00:15:00"
-      dragScroll={true}
+      dragScroll={!isMobile}
       dragRevertDuration={500}
       expandRows={true}
       stickyHeaderDates={true}
