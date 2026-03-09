@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Calendar from '../components/Calendar';
+import { useTheme } from '../context/ThemeContext';
 import EventModal from '../components/EventModal';
 import ClubFilterSidebar from '../components/ClubFilterSidebar';
 import Navbar from '../components/Navbar';
@@ -16,6 +17,7 @@ export default function CalendarPage() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user, isAuthenticated } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const calendarRef = useRef(null);
 
@@ -261,7 +263,7 @@ export default function CalendarPage() {
         end: currentView.activeEnd
       };
 
-      await exportToPDF(events, selectedClubs, dateRange, currentView.type);
+      await exportToPDF(events, selectedClubs, dateRange, currentView.type, theme);
     } catch (error) {
       console.error('Failed to export PDF:', error);
       alert('Error exporting PDF. Please try again.');

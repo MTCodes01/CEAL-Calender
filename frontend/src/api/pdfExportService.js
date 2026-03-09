@@ -24,14 +24,14 @@ const getContrastColor = (rgb) => {
 /**
  * Draws a traditional calendar grid for Month View with badge-style IDs
  */
-const drawMonthGrid = (doc, events, dateRange, options) => {
+const drawMonthGrid = (doc, events, dateRange, options, themeColors) => {
   const { margin, gridTop, gridWidth, pageWidth } = options;
   const start = new Date(dateRange.start);
   const end = new Date(dateRange.end);
   
   // Title
   doc.setFontSize(22);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(...themeColors.textPrimary);
   const monthTitle = start.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
   doc.text(monthTitle, pageWidth / 2, 20, { align: 'center' });
 
@@ -47,14 +47,14 @@ const drawMonthGrid = (doc, events, dateRange, options) => {
   const gridHeight = rowCount * rowHeight;
 
   // Grid Background
-  doc.setFillColor(30, 41, 59); // slate-800
+  doc.setFillColor(...themeColors.surface); 
   doc.rect(margin, gridTop, gridWidth, gridHeight, 'F');
   
   // Day Headers
-  doc.setDrawColor(51, 65, 85); 
+  doc.setDrawColor(...themeColors.border); 
   doc.setLineWidth(0.1);
   doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184);
+  doc.setTextColor(...themeColors.textSecondary);
   dayLabels.forEach((label, i) => {
     const x = margin + i * colWidth;
     doc.text(label, x + colWidth / 2, gridTop + 5, { align: 'center' });
@@ -77,7 +77,7 @@ const drawMonthGrid = (doc, events, dateRange, options) => {
           
           // Date Number
           doc.setFontSize(6);
-          doc.setTextColor(100, 116, 139);
+          doc.setTextColor(...themeColors.textSecondary);
           doc.text(`${d.getDate()}`, x + colWidth - 2, y + 4, { align: 'right' });
           
           // Render events as small square badges in a grid
@@ -128,7 +128,7 @@ const drawMonthGrid = (doc, events, dateRange, options) => {
 /**
  * Draws the high-fidelity vertical timeline (Week & Day Views)
  */
-const drawScheduleTimeline = (doc, events, dateRange, options) => {
+const drawScheduleTimeline = (doc, events, dateRange, options, themeColors) => {
   const { margin, gridTop, gridWidth, pageWidth } = options;
   const gutterWidth = 18;
   const timelineHeight = 150;
@@ -140,7 +140,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
   
   // Title
   doc.setFontSize(22);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(...themeColors.textPrimary);
   const diffTime = Math.abs(endLimit - startLimit);
   const actualDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
   
@@ -150,17 +150,20 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
   doc.text(titleText, pageWidth / 2, 20, { align: 'center' });
 
   // Surfaces
-  doc.setFillColor(30, 41, 59); // slate-800
+  doc.setFillColor(...themeColors.surface); 
   doc.rect(margin, gridTop, gridWidth, timelineHeight + allDayHeight, 'F');
-  doc.setFillColor(15, 23, 42); // slate-900
+  
+  // Different color for Gutter in Dark mode, but maybe same for Light?
+  const gutterColor = themeColors.theme === 'dark' ? [15, 23, 42] : [241, 245, 249];
+  doc.setFillColor(...gutterColor); 
   doc.rect(margin, gridTop, gutterWidth, timelineHeight + allDayHeight, 'F');
 
-  doc.setDrawColor(51, 65, 85); 
+  doc.setDrawColor(...themeColors.border); 
   doc.setLineWidth(0.1);
   doc.line(margin, gridTop + allDayHeight, margin + gridWidth, gridTop + allDayHeight);
   
   doc.setFontSize(7);
-  doc.setTextColor(100, 116, 139);
+  doc.setTextColor(...themeColors.textSecondary);
   doc.text('all-day', margin + 2, gridTop + 6);
 
   for (let i = 0; i <= 24; i++) {
@@ -169,7 +172,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
     const label = i === 0 ? '12 am' : i < 12 ? `${i} am` : i === 12 ? '12 pm' : `${i - 12} pm`;
     if (i < 24) {
       doc.setFontSize(7);
-      doc.setTextColor(148, 163, 184);
+      doc.setTextColor(...themeColors.textSecondary);
       doc.text(label, margin + 2, y + 2);
     }
   }
@@ -184,7 +187,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
     if (dIdx > 0) doc.line(dayX, gridTop, dayX, gridTop + timelineHeight + allDayHeight);
 
     doc.setFontSize(actualDays > 7 ? 4 : 6);
-    doc.setTextColor(148, 163, 184);
+    doc.setTextColor(...themeColors.textSecondary);
     const dayLabel = actualDays > 7 
       ? `${currentDayStart.getDate()}`
       : currentDayStart.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric' });
@@ -261,13 +264,57 @@ const drawScheduleTimeline = (doc, events, dateRange, options) => {
 /**
  * Main Export Service
  */
-export const exportToPDF = async (events, selectedClubs, dateRange, viewType) => {
+export const exportToPDF = async (events, selectedClubs, dateRange, viewType, theme = 'dark') => {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
-  doc.setFillColor(15, 23, 42); 
-  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+  // Theme Palettes
+  const getThemeColors = (t) => {
+    if (t === 'dark') {
+      return {
+        theme: 'dark',
+        background: [15, 23, 42],     // slate-900
+        surface: [30, 41, 59],        // slate-800
+        textPrimary: [255, 255, 255],
+        textSecondary: [148, 163, 184],
+        border: [51, 65, 85],         // slate-700
+        tableBody: [15, 23, 42],
+        tableAlt: [17, 24, 39],
+        tableText: [203, 213, 225]
+      };
+    }
+    return {
+      theme: 'light',
+      background: [248, 250, 252],    // slate-50
+      surface: [255, 255, 255],
+      textPrimary: [15, 23, 42],      // slate-900
+      textSecondary: [71, 85, 105],   // slate-600
+      border: [226, 232, 240],        // slate-200
+      tableBody: [255, 255, 255],
+      tableAlt: [249, 250, 251],
+      tableText: [51, 65, 85]
+    };
+  };
+
+  const themeColors = getThemeColors(theme);
+
+  // Helper to draw background
+  const drawBackground = (d) => {
+    d.setFillColor(...themeColors.background);
+    d.rect(0, 0, d.internal.pageSize.getWidth(), d.internal.pageSize.getHeight(), 'F');
+  };
+
+  // Override addPage to ensure background is drawn on every new page
+  const originalAddPage = doc.addPage.bind(doc);
+  doc.addPage = function() {
+    originalAddPage.apply(this, arguments);
+    drawBackground(this);
+    return this;
+  };
+
+  // Draw background on the first page
+  drawBackground(doc);
 
   const options = {
     margin: 12,
@@ -289,9 +336,9 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
 
   let lastY;
   if (viewType === 'dayGridMonth') {
-    lastY = drawMonthGrid(doc, filteredEvents, dateRange, options);
+    lastY = drawMonthGrid(doc, filteredEvents, dateRange, options, themeColors);
   } else {
-    lastY = drawScheduleTimeline(doc, filteredEvents, dateRange, options);
+    lastY = drawScheduleTimeline(doc, filteredEvents, dateRange, options, themeColors);
   }
 
   const tableRows = filteredEvents.map(e => [
@@ -311,10 +358,21 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType) =>
     head: [['ID', 'Event Title', 'Start', 'End', 'Main Club', 'Sub Club', 'Collaborating Clubs']],
     body: tableRows,
     theme: 'grid',
-    headStyles: { fillColor: [30, 41, 59], textColor: [255, 255, 255] },
-    bodyStyles: { fillColor: [15, 23, 42], textColor: [203, 213, 225], fontSize: 7 },
-    alternateRowStyles: { fillColor: [17, 24, 39] },
-    styles: { lineColor: [51, 65, 85] },
+    headStyles: { 
+      fillColor: themeColors.theme === 'dark' ? [30, 41, 59] : [51, 65, 85], 
+      textColor: [255, 255, 255] 
+    },
+    bodyStyles: { 
+      fillColor: themeColors.tableBody, 
+      textColor: themeColors.tableText, 
+      fontSize: 7 
+    },
+    alternateRowStyles: { 
+      fillColor: themeColors.tableAlt 
+    },
+    styles: { 
+      lineColor: themeColors.border 
+    },
     columnStyles: { 6: { cellWidth: 40 } },
     margin: { left: 12, right: 12 }
   });
