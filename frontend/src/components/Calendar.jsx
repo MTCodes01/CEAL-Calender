@@ -158,6 +158,9 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       expandRows={true}
       stickyHeaderDates={true}
       nowIndicator={true}
+      longPressDelay={250}
+      eventLongPressDelay={250}
+      selectLongPressDelay={250}
       />
     </>
   );

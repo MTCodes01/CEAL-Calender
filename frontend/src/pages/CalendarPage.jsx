@@ -388,7 +388,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            <div className="flex-1 min-h-[400px] bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-hidden p-1 sm:p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
+            <div className="flex-1 min-h-[400px] bg-white/50 dark:bg-gray-800/30 rounded-xl overflow-y-auto p-1 sm:p-2 shadow-inner border border-gray-100 dark:border-gray-800/50">
               <Calendar
                 ref={calendarRef}
                 events={events}
