@@ -263,7 +263,7 @@ export default function CalendarPage() {
         end: currentView.activeEnd
       };
 
-      await exportToPDF(events, selectedClubs, dateRange, currentView.type, theme);
+      await exportToPDF(events, selectedClubs, dateRange, currentView.type, theme, user?.time_format || '12h');
     } catch (error) {
       console.error('Failed to export PDF:', error);
       alert('Error exporting PDF. Please try again.');
@@ -393,6 +393,7 @@ export default function CalendarPage() {
                 ref={calendarRef}
                 events={events}
                 userColor={userColor}
+                timeFormat={user?.time_format || '12h'}
                 selectable={canCreate}
                 onEventClick={handleEventClick}
                 onDateSelect={handleDateSelect}
@@ -409,6 +410,7 @@ export default function CalendarPage() {
         <EventModal
           event={selectedEvent}
           canEdit={selectedEvent?.id ? canEditEvent(selectedEvent) : true}
+          timeFormat={user?.time_format || '12h'}
           onClose={handleModalClose}
           onSave={handleEventSaved}
           onDelete={handleEventDeleted}

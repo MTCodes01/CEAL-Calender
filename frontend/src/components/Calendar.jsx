@@ -5,7 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { getContrastColor } from '../utils/colorUtils';
 
-const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
+const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h', selectable = true, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
 
   useImperativeHandle(ref, () => ({
@@ -61,6 +61,19 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', selectable = true,
       selectOverlap={true}
       slotEventOverlap={false}
       editable={true}
+      slotLabelFormat={{
+        hour: 'numeric',
+        minute: '2-digit',
+        omitZeroMinute: false,
+        meridiem: timeFormat === '12h' ? 'short' : false,
+        hour12: timeFormat === '12h'
+      }}
+      eventTimeFormat={{
+        hour: 'numeric',
+        minute: '2-digit',
+        meridiem: timeFormat === '12h' ? 'short' : false,
+        hour12: timeFormat === '12h'
+      }}
       eventDrop={(info) => {
         if (onEventDrop) onEventDrop(info);
       }}

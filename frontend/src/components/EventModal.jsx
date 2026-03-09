@@ -5,7 +5,7 @@ import api from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { getContrastColor } from '../utils/colorUtils';
 
-export default function EventModal({ event, canEdit, onClose, onSave, onDelete, clubs = [] }) {
+export default function EventModal({ event, canEdit, timeFormat = '12h', onClose, onSave, onDelete, clubs = [] }) {
   const { user } = useAuth();
   const [formData, setFormData] = useState({
     title: '',
@@ -235,7 +235,9 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
               )}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date &amp; Time</label>
-                <p className="text-gray-900 dark:text-gray-100">{new Date(event.start).toLocaleString()} - {new Date(event.end).toLocaleString()}</p>
+                <p className="text-gray-900 dark:text-gray-100">
+                  {new Date(event.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' })} - {new Date(event.end).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' })}
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
@@ -321,7 +323,9 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                     selected={formData.start}
                     onChange={(date) => setFormData({ ...formData, start: date })}
                     showTimeSelect
-                    dateFormat="Pp"
+                    timeFormat={timeFormat === '12h' ? 'h:mm aa' : 'HH:mm'}
+                    timeIntervals={15}
+                    dateFormat={timeFormat === '12h' ? 'MMMM d, yyyy h:mm aa' : 'MMMM d, yyyy HH:mm'}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
@@ -331,7 +335,9 @@ export default function EventModal({ event, canEdit, onClose, onSave, onDelete, 
                     selected={formData.end}
                     onChange={(date) => setFormData({ ...formData, end: date })}
                     showTimeSelect
-                    dateFormat="Pp"
+                    timeFormat={timeFormat === '12h' ? 'h:mm aa' : 'HH:mm'}
+                    timeIntervals={15}
+                    dateFormat={timeFormat === '12h' ? 'MMMM d, yyyy h:mm aa' : 'MMMM d, yyyy HH:mm'}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>

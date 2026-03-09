@@ -128,7 +128,7 @@ const drawMonthGrid = (doc, events, dateRange, options, themeColors) => {
 /**
  * Draws the high-fidelity vertical timeline (Week & Day Views)
  */
-const drawScheduleTimeline = (doc, events, dateRange, options, themeColors) => {
+const drawScheduleTimeline = (doc, events, dateRange, options, themeColors, timeFormat) => {
   const { margin, gridTop, gridWidth, pageWidth } = options;
   const gutterWidth = 18;
   const timelineHeight = 150;
@@ -169,7 +169,14 @@ const drawScheduleTimeline = (doc, events, dateRange, options, themeColors) => {
   for (let i = 0; i <= 24; i++) {
     const y = gridTop + allDayHeight + (i * hourHeight);
     doc.line(margin + gutterWidth, y, margin + gridWidth, y);
-    const label = i === 0 ? '12 am' : i < 12 ? `${i} am` : i === 12 ? '12 pm' : `${i - 12} pm`;
+    
+    let label;
+    if (timeFormat === '12h') {
+      label = i === 0 ? '12 am' : i < 12 ? `${i} am` : i === 12 ? '12 pm' : `${i - 12} pm`;
+    } else {
+      label = i < 10 ? `0${i}:00` : `${i}:00`;
+    }
+
     if (i < 24) {
       doc.setFontSize(7);
       doc.setTextColor(...themeColors.textSecondary);
@@ -264,7 +271,7 @@ const drawScheduleTimeline = (doc, events, dateRange, options, themeColors) => {
 /**
  * Main Export Service
  */
-export const exportToPDF = async (events, selectedClubs, dateRange, viewType, theme = 'dark') => {
+export const exportToPDF = async (events, selectedClubs, dateRange, viewType, theme = 'dark', timeFormat = '12h') => {
   const doc = new jsPDF('p', 'mm', 'a4');
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -338,14 +345,14 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType, th
   if (viewType === 'dayGridMonth') {
     lastY = drawMonthGrid(doc, filteredEvents, dateRange, options, themeColors);
   } else {
-    lastY = drawScheduleTimeline(doc, filteredEvents, dateRange, options, themeColors);
+    lastY = drawScheduleTimeline(doc, filteredEvents, dateRange, options, themeColors, timeFormat);
   }
 
   const tableRows = filteredEvents.map(e => [
     `#${e._displayId}`,
     e.title,
-    new Date(e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
-    new Date(e.end || e.start).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }),
+    new Date(e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' }),
+    new Date(e.end || e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' }),
     e.club?.parent_name || e.club?.name || 'N/A',
     e.club?.parent_name ? (e.club?.name || '-') : '-',
     (e.collaborating_clubs && e.collaborating_clubs.length > 0)
@@ -377,5 +384,34 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType, th
     margin: { left: 12, right: 12 }
   });
 
-  doc.save(`Calendar_${viewType}_${new Date().toISOString().split('T')[0]}.pdf`);
+  // Generate dynamic filename based on dateRange and viewType
+  const formatFileNameDate = (date) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}_${month}_${year}`;
+  };
+
+  const startStr = formatFileNameDate(dateRange.start);
+  let fileName;
+
+  if (viewType === 'timeGridDay') {
+    fileName = `CampusCalendar_${startStr}.pdf`;
+  } else if (viewType === 'timeGridWeek') {
+    const endStr = formatFileNameDate(new Date(dateRange.end).getTime() - 86400000); // Subtract 1 day because FC end is exclusive
+    fileName = `CampusCalendar_${startStr}_to_${endStr}.pdf`;
+  } else if (viewType === 'dayGridMonth') {
+    const d = new Date(dateRange.start);
+    // Month views usually start at the beginning of the actual month, 
+    // but sometimes include trailing days of prev month. 
+    // We'll use the month name/year for the filename.
+    const monthName = d.toLocaleDateString(undefined, { month: '2-digit' });
+    const year = d.getFullYear();
+    fileName = `CampusCalendar_${monthName}_${year}.pdf`;
+  } else {
+    fileName = `CampusCalendar_${new Date().toISOString().split('T')[0]}.pdf`;
+  }
+
+  doc.save(fileName);
 };
