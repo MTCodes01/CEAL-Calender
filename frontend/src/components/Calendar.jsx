@@ -5,8 +5,9 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { getContrastColor } from '../utils/colorUtils';
 
-const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h', selectable = true, onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
+const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h', selectable = true, timezone = 'Asia/Kolkata', onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
   const calendarRef = useRef(null);
+
 
   useImperativeHandle(ref, () => ({
     getApi: () => calendarRef.current.getApi(),
@@ -48,7 +49,9 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       <FullCalendar
         ref={calendarRef}
       plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+      timeZone={timezone}
       initialView="dayGridMonth"
+
       headerToolbar={{
         left: 'prev,next today',
         center: 'title',

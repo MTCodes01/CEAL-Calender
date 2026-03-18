@@ -271,8 +271,9 @@ const drawScheduleTimeline = (doc, events, dateRange, options, themeColors, time
 /**
  * Main Export Service
  */
-export const exportToPDF = async (events, selectedClubs, dateRange, viewType, theme = 'dark', timeFormat = '12h') => {
+export const exportToPDF = async (events, selectedClubs, dateRange, viewType, theme = 'dark', timeFormat = '12h', timezone = 'Asia/Kolkata') => {
   const doc = new jsPDF('p', 'mm', 'a4');
+
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   
@@ -351,8 +352,9 @@ export const exportToPDF = async (events, selectedClubs, dateRange, viewType, th
   const tableRows = filteredEvents.map(e => [
     `#${e._displayId}`,
     e.title,
-    new Date(e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' }),
-    new Date(e.end || e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' }),
+    new Date(e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short', timeZone: timezone }),
+    new Date(e.end || e.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short', timeZone: timezone }),
+
     e.club?.parent_name || e.club?.name || 'N/A',
     e.club?.parent_name ? (e.club?.name || '-') : '-',
     (e.collaborating_clubs && e.collaborating_clubs.length > 0)

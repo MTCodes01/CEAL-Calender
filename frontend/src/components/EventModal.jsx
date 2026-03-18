@@ -236,9 +236,10 @@ export default function EventModal({ event, canEdit, timeFormat = '12h', onClose
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date &amp; Time</label>
                 <p className="text-gray-900 dark:text-gray-100">
-                  {new Date(event.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' })} - {new Date(event.end).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short' })}
+                  {new Date(event.start).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short', timeZone: user?.timezone || 'Asia/Kolkata' })} - {new Date(event.end).toLocaleString([], { hour12: timeFormat === '12h', dateStyle: 'medium', timeStyle: 'short', timeZone: user?.timezone || 'Asia/Kolkata' })}
                 </p>
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                 <p className="text-gray-900 dark:text-gray-100">📍 {event.location}</p>

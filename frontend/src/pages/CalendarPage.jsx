@@ -263,8 +263,9 @@ export default function CalendarPage() {
         end: currentView.activeEnd
       };
 
-      await exportToPDF(events, selectedClubs, dateRange, currentView.type, theme, user?.time_format || '12h');
+      await exportToPDF(events, selectedClubs, dateRange, currentView.type, theme, user?.time_format || '12h', user?.timezone || 'Asia/Kolkata');
     } catch (error) {
+
       console.error('Failed to export PDF:', error);
       alert('Error exporting PDF. Please try again.');
     }
@@ -394,6 +395,7 @@ export default function CalendarPage() {
                 events={events}
                 userColor={userColor}
                 timeFormat={user?.time_format || '12h'}
+                timezone={user?.timezone || 'Asia/Kolkata'}
                 selectable={canCreate}
                 onEventClick={handleEventClick}
                 onDateSelect={handleDateSelect}
@@ -401,6 +403,7 @@ export default function CalendarPage() {
                 onEventDrop={handleEventDrop}
                 onEventResize={handleEventResize}
               />
+
             </div>
           </div>
         </div>
