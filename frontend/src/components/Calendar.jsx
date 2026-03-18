@@ -3,6 +3,7 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import momentTimezonePlugin from '@fullcalendar/moment-timezone';
 import { getContrastColor } from '../utils/colorUtils';
 
 const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h', selectable = true, timezone = 'Asia/Kolkata', onEventClick, onDateSelect, onDatesSet, onEventDrop, onEventResize }, ref) => {
@@ -48,7 +49,7 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       `}</style>
       <FullCalendar
         ref={calendarRef}
-      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, momentTimezonePlugin]}
       timeZone={timezone}
       initialView="dayGridMonth"
 
