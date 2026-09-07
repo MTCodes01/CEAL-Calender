@@ -124,6 +124,16 @@ body > .fc-event-mirror {
   pointer-events: none !important;
 }
 
+/* Disable dragging and preserve smooth touch scrolling on mobile */
+@media (max-width: 767px) {
+  .fc-event {
+    touch-action: pan-y !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+}
+
 /* Light mode overrides for FullCalendar borders */
 .fc-theme-standard .fc-scrollgrid {
   border-color: rgba(156, 163, 175, 0.2);

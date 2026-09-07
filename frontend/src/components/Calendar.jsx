@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useRef, forwardRef, useImperativeHandle, useState } from 'react';
+import { useRef, forwardRef, useImperativeHandle, useState, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -13,6 +13,15 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
   const calendarRef = useRef(/** @type {any} */ (null));
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState('dayGridMonth');
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useImperativeHandle(ref, () => ({
     getApi: () => calendarRef.current?.getApi(),
@@ -25,10 +34,10 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
     end: event.end,
     backgroundColor: event.club.color,
     borderColor: event.club.color,
-    editable: event.editable,
-    startEditable: event.startEditable,
-    durationEditable: event.durationEditable,
-    resourceEditable: event.resourceEditable,
+    editable: isMobile ? false : event.editable,
+    startEditable: isMobile ? false : event.startEditable,
+    durationEditable: isMobile ? false : event.durationEditable,
+    resourceEditable: isMobile ? false : event.resourceEditable,
     extendedProps: {
       description: event.description,
       location: event.location,
@@ -37,8 +46,6 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       created_by_name: event.created_by_name,
     },
   }));
-
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   return (
     <div className="flex flex-col relative w-full h-full">
@@ -241,7 +248,11 @@ const Calendar = forwardRef(({ events, userColor = '#3779e6', timeFormat = '12h'
       unselectAuto={false}
       selectOverlap={true}
       slotEventOverlap={false}
-      editable={isMobile ? false : true}
+      editable={!isMobile}
+      eventStartEditable={!isMobile}
+      eventDurationEditable={!isMobile}
+      eventResizableFromStart={!isMobile}
+      droppable={!isMobile}
       fixedMirrorParent={typeof document !== 'undefined' ? (document.body || undefined) : undefined}
       eventDragStart={(info) => {
         const color = info.event.backgroundColor || info.event.borderColor || info.event.extendedProps?.club?.color;
