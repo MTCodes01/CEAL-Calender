@@ -2,6 +2,7 @@
  * Returns '#000000' or '#ffffff' depending on which gives better
  * contrast against the given hex background color.
  * Uses the WCAG perceived-luminance formula.
+ * @param {string} [hexColor]
  */
 export function getContrastColor(hexColor) {
   if (!hexColor) return '#ffffff';
